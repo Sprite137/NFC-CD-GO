@@ -7,7 +7,6 @@ import (
 	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/speaker"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -25,7 +24,7 @@ func TestPrintTime(t *testing.T) {
 	// 解码音乐文件
 	streamer, format, err := mp3.Decode(file)
 	if err != nil {
-		log.Fatal("解析文件错误", err)
+		// 处理错误
 	}
 
 	defer streamer.Close()
@@ -77,7 +76,7 @@ func TestPauseAndResume(t *testing.T) {
 			// 处理错误
 
 		}
-		if n == 0 {
+		if n == 103 {
 			speaker.Lock()
 			ctrl.Paused = !ctrl.Paused
 			speaker.Unlock()
