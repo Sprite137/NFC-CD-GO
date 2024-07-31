@@ -26,6 +26,13 @@ func main() {
 
 	// 打印歌曲进度，切换下一首
 	currentIndex := 0
+
+	for i, songPath := range allSongList {
+		if songPath == file.Name() {
+			currentIndex = i
+			break
+		}
+	}
 	go func() {
 		for {
 			if player.ctrl.Paused != true {
@@ -44,15 +51,18 @@ func main() {
 
 	// 起协程获取opr
 	go func() {
+		oprNum := -1
+
 		for {
+
 			//fmt.Println("请输入操作：")
 			//fmt.Println("0. 暂停/播放")
 			//fmt.Println("1. 下一首")
 			//fmt.Println("2. 上一首")
 			//fmt.Println("3. 退出")
 			//fmt.Println("输入")
-			n, _ := fmt.Scanln()
-			opr <- n
+			fmt.Scanln(&oprNum)
+			opr <- oprNum
 		}
 	}()
 
@@ -61,6 +71,7 @@ func main() {
 		for {
 			n := <-opr
 			switch n {
+			// 暂停，恢复
 			case 0:
 				player.togglePlay()
 				if player.ctrl.Paused {
@@ -68,7 +79,12 @@ func main() {
 				} else {
 					fmt.Printf("playing...\n")
 				}
+			// 切为下一首
+			case 1:
+				fmt.Printf("切换为下一首...\n")
+				player.changeSong(&currentIndex)
 			}
+
 		}
 
 	}()
