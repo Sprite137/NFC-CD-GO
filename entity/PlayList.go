@@ -3,7 +3,6 @@ package entity
 import (
 	"bufio"
 	"io"
-	"log"
 	"os"
 )
 
@@ -33,10 +32,11 @@ func (p *PlayList) getNextSongIndex() int {
 }
 
 // SetList 设置歌单的列表
-func (p *PlayList) SetList(filePath string) {
+func (p *PlayList) SetList(filePath string) bool {
 	fileHandle, err := os.OpenFile(filePath, os.O_RDONLY, 0666)
 	if err != nil {
-		log.Fatal("读取songList文件错误", err)
+		//log.Fatal("读取songList文件错误", err)
+		return false
 	}
 
 	defer fileHandle.Close()
@@ -53,4 +53,5 @@ func (p *PlayList) SetList(filePath string) {
 		results = append(results, string(line))
 	}
 	p.SongNames = results
+	return true
 }
