@@ -111,7 +111,6 @@ func main() {
 
 			// 切换歌单
 			case 3:
-				// todo 需要修复输入歌单bug
 				fmt.Print("请输入歌单txt:")
 				songListPath := ""
 				fmt.Scanln(&songListPath)
