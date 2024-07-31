@@ -36,7 +36,7 @@ func (p *PlayList) getNextSongIndex() int {
 func (p *PlayList) SetList(filePath string) {
 	fileHandle, err := os.OpenFile(filePath, os.O_RDONLY, 0666)
 	if err != nil {
-		log.Fatal("读取songList文件错误")
+		log.Fatal("读取songList文件错误", err)
 	}
 
 	defer fileHandle.Close()
