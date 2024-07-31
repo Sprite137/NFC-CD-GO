@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
@@ -10,38 +9,13 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
 var targetFormat = beep.Format{
-	SampleRate:  beep.SampleRate(44100),
+	SampleRate:  44100,
 	NumChannels: 2,
 	Precision:   2,
-}
-
-var allSongList []string
-
-func getAllSongList() []string {
-	fileHandle, err := os.OpenFile("resources/songList.txt", os.O_RDONLY, 0666)
-	if err != nil {
-		log.Fatal("读取songList文件错误")
-	}
-
-	defer fileHandle.Close()
-
-	reader := bufio.NewReader(fileHandle)
-
-	var results []string
-	// 按行处理txt
-	for {
-		line, _, err := reader.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		results = append(results, string(line))
-	}
-	return results
 }
 
 /*
@@ -49,7 +23,7 @@ IterFunc ：定义了一个名为IterFunc的新类型，它是一个函数类型
 在Go中，函数本身也可以被当作类型来使用，这允许我们创建函数类型的变量，这些变量可以存储和传递函数。
 用于后续的音频迭代
 */
-//type IterFunc func() beep.Streamer
+type IterFunc func() beep.Streamer
 
 // Player 定义一个播放器
 type Player struct {
@@ -59,26 +33,30 @@ type Player struct {
 	currentStream beep.StreamSeeker // 当前音频流的位置
 }
 
-// NewPlayer 创建一个播放器
-func NewPlayer() *Player {
+// 创建一个播放器
+func newPlayer() *Player {
 	p := &Player{}
-	allSongList = getAllSongList()
 	return p.reset()
 }
 
 // 下一首歌的切换逻辑：随机-顺序-循环
-func nextSong(currentIndex *int) beep.StreamSeekCloser {
+func nextSong(currentIndex int) beep.StreamSeekCloser {
+	audioFiles := []string{
+		"resources/sound_sculptors.mp3",
+		"resources/瑶山遗韵.mp3",
+		"resources/霞据云佩.mp3",
+	}
 
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
-	if *currentIndex >= len(allSongList)-1 {
+	if currentIndex >= len(audioFiles) {
 		// 如果没有更多的文件，将currentIndex置为-1
-		*currentIndex = -1
+		currentIndex = -1
 	}
 
-	*currentIndex++
+	currentIndex++
 
 	// 打开当前索引的音频文件
-	file, err := os.Open(allSongList[*currentIndex])
+	file, err := os.Open(audioFiles[currentIndex])
 	if err != nil {
 		log.Printf("Failed to open audio file: %v", err)
 		return nil
@@ -90,57 +68,23 @@ func nextSong(currentIndex *int) beep.StreamSeekCloser {
 		log.Printf("Failed to decode audio file: %v", err)
 		return nil
 	}
-	fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
 
 	return streamer
 
-}
-
-// 上一首的切歌逻辑
-func previousSong(currentIndex *int) beep.StreamSeekCloser {
-	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
-	if *currentIndex == 0 {
-		// 如果没有上一首，将currentIndex置为len(allSongList的长度)
-		*currentIndex = len(allSongList)
-	}
-
-	*currentIndex--
-
-	// 打开当前索引的音频文件
-	file, err := os.Open(allSongList[*currentIndex])
-	if err != nil {
-		log.Printf("Failed to open audio file: %v", err)
-		return nil
-	}
-
-	// 解码音频文件并返回streamer
-	streamer, _, err := mp3.Decode(file)
-	if err != nil {
-		log.Printf("Failed to decode audio file: %v", err)
-		return nil
-	}
-	fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
-
-	return streamer
 }
 
 // 播放器切歌逻辑
-func (p *Player) changeSong(currentIndex *int, changeLogic int) {
+func (p *Player) changeSong(currentIndex int) {
 	speaker.Clear()
 
-	var streamer beep.StreamSeekCloser
-	// 拿到下一首的streamer
-	if changeLogic == 0 {
-		streamer = nextSong(currentIndex)
-	} else if changeLogic == 1 {
-		streamer = previousSong(currentIndex)
-	}
+	// 拿到下一次的streamer
+	steamer := nextSong(currentIndex)
 
 	// 更新currentStream
-	p.currentStream = streamer
+	p.currentStream = steamer
 
 	// 更新streamer
-	p.streamer = streamer
+	p.streamer = steamer
 
 	p.ctrl = &beep.Ctrl{Streamer: p.streamer}
 
@@ -155,9 +99,9 @@ func (p *Player) reset() *Player {
 	return p
 }
 
-// Open 开启播放器：open方法初始化音频输出设备，并开始播放音频。
-func (p *Player) Open() *Player {
-	speaker.Init(targetFormat.SampleRate, targetFormat.SampleRate.N(time.Second/10))
+// 开启播放器：open方法初始化音频输出设备，并开始播放音频。
+func (p *Player) open() *Player {
+	speaker.Init(targetFormat.SampleRate, targetFormat.NumChannels)
 	speaker.Play(p.ctrl)
 	return p
 }
@@ -175,13 +119,13 @@ func (p *Player) togglePlay() {
 	speaker.Unlock()
 }
 
-// PlayMp3 解码一个mp3文件，设置player当前的参数
-func (p *Player) PlayMp3(file io.ReadCloser) beep.Streamer {
+// 解码一个mp3文件，设置player当前的参数
+func (p *Player) playMp3(file io.ReadCloser) beep.Streamer {
 	streamer, _, err := mp3.Decode(file)
 	if err != nil {
-		log.Fatal("mp3 decode failed:", err)
 		return nil
 	}
+
 	p.streamer = streamer      // 如果没设置会runtime error: invalid memory address or nil pointer dereference
 	p.currentStream = streamer // 方便记录currentPosition()
 	p.ctrl = &beep.Ctrl{Streamer: p.streamer}
@@ -204,6 +148,5 @@ func (p *Player) currentPosition() string {
 
 // 当前音乐是否播放完
 func (p *Player) isDone() bool {
-	// 增加容错，两者不会严格相等
-	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.99
+	return p.currentStream.Position() == p.currentStream.Len()
 }
