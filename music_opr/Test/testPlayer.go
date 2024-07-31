@@ -21,9 +21,32 @@ func main() {
 	//ctrl := &beep.Ctrl{Streamer: beep.Loop(-1, streamer), Paused: false}
 	//speaker.Play(ctrl)
 
-	a := 1
-	add(&a)
-	fmt.Print(a)
+	//a := 1
+	//add(&a)
+	//fmt.Print(a)
+
+	opr := make(chan int)
+	go func() {
+		for {
+			//fmt.Println("请输入操作：")
+			//fmt.Println("0. 暂停/播放")
+			//fmt.Println("1. 下一首")
+			//fmt.Println("2. 上一首")
+			//fmt.Println("3. 退出")
+			fmt.Println("输入")
+			n, _ := fmt.Scanln()
+			opr <- n
+		}
+	}()
+
+	for {
+		switch <-opr {
+		case 0:
+			fmt.Printf("togglePlay, len(opr)：%v \n", len(opr))
+		}
+	}
+
+	select {}
 
 }
 
