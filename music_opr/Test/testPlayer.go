@@ -1,5 +1,13 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"log"
+	"os"
+)
+
 func main() {
 	//file, err := os.Open("resources/霞据云佩.mp3")
 	//if err != nil {
@@ -48,6 +56,26 @@ func main() {
 	//}
 	//
 	//select {}
+
+	fileHandle, err := os.OpenFile("resources/songList.txt", os.O_RDONLY, 0666)
+	if err != nil {
+		log.Fatal("读取songList文件错误")
+	}
+
+	defer fileHandle.Close()
+
+	reader := bufio.NewReader(fileHandle)
+
+	var results []string
+	// 按行处理txt
+	for {
+		line, _, err := reader.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		results = append(results, string(line))
+	}
+	fmt.Printf("read result:%v\n", results)
 
 }
 
