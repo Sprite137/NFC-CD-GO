@@ -96,18 +96,51 @@ func nextSong(currentIndex *int) beep.StreamSeekCloser {
 
 }
 
+// 上一首的切歌逻辑
+func previousSong(currentIndex *int) beep.StreamSeekCloser {
+	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
+	if *currentIndex == 0 {
+		// 如果没有上一首，将currentIndex置为len(allSongList的长度)
+		*currentIndex = len(allSongList)
+	}
+
+	*currentIndex--
+
+	// 打开当前索引的音频文件
+	file, err := os.Open(allSongList[*currentIndex])
+	if err != nil {
+		log.Printf("Failed to open audio file: %v", err)
+		return nil
+	}
+
+	// 解码音频文件并返回streamer
+	streamer, _, err := mp3.Decode(file)
+	if err != nil {
+		log.Printf("Failed to decode audio file: %v", err)
+		return nil
+	}
+	fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
+
+	return streamer
+}
+
 // 播放器切歌逻辑
-func (p *Player) changeSong(currentIndex *int) {
+func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	speaker.Clear()
 
-	// 拿到下一次的streamer
-	steamer := nextSong(currentIndex)
+	var streamer beep.StreamSeekCloser
+	// 拿到下一首的streamer
+	if changeLogic == 0 {
+		streamer = nextSong(currentIndex)
+	} else if changeLogic == 1 {
+		streamer = previousSong(currentIndex)
+	}
 
 	// 更新currentStream
-	p.currentStream = steamer
+	p.currentStream = streamer
 
 	// 更新streamer
-	p.streamer = steamer
+	p.streamer = streamer
 
 	p.ctrl = &beep.Ctrl{Streamer: p.streamer}
 
