@@ -76,7 +76,7 @@ func TestPauseAndResume(t *testing.T) {
 			// 处理错误
 
 		}
-		if n == 103 {
+		if n == 0 {
 			speaker.Lock()
 			ctrl.Paused = !ctrl.Paused
 			speaker.Unlock()

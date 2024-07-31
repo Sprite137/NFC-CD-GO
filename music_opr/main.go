@@ -2,45 +2,42 @@ package main
 
 import (
 	"fmt"
-	"github.com/faiface/beep"
-	"github.com/faiface/beep/mp3"
-	"github.com/faiface/beep/speaker"
+	"log"
 	"os"
 	"time"
 )
 
 func main() {
 	// 打开音乐文件
-	file, err := os.Open("/Users/xuzhi/Documents/work_project/NetCD-go/resources/霞据云佩.mp3")
+	file, err := os.Open("resources/sound_sculptors.mp3")
 	if err != nil {
-		// 处理错误
+		log.Fatal("读取file错误")
 	}
 	defer file.Close()
 
-	// 解码音乐文件
-	streamer, format, err := mp3.Decode(file)
-	if err != nil {
-		// 处理错误
+	player := newPlayer()
+
+	player.playMp3(file)
+	if player.streamer == nil {
+		log.Fatal("Failed to decode the audio file")
 	}
 
-	defer streamer.Close()
-	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+	player.open() // 初始化音频输出设备
 
-	ctrl := &beep.Ctrl{Streamer: beep.Loop(-1, streamer), Paused: false}
-	speaker.Play(ctrl)
-
-	for {
-		//fmt.Print("Press [ENTER] to pause/resume. ")
-		n, err := fmt.Scanln()
-		if err != nil {
-			// 处理错误
-
+	currentIndex := 0
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			fmt.Print(player.currentPosition(), "\n")
+			// 当前音乐播放完，切换下一首
+			if player.isDone() {
+				fmt.Println("正在切换下一首...")
+				player.changeSong(currentIndex)
+				currentIndex++
+			}
 		}
-		if n == 0 {
-			speaker.Lock()
-			ctrl.Paused = !ctrl.Paused
-			speaker.Unlock()
-		}
+	}()
 
-	}
+	select {}
+
 }
