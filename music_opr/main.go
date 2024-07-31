@@ -44,7 +44,7 @@ func main() {
 	go func() {
 		for {
 			if player.ctrl.Paused != true {
-				fmt.Print(player.currentPosition(), "\n")
+				//fmt.Print(player.currentPosition(), "\n")
 				time.Sleep(1 * time.Second)
 			}
 			// 当前音乐播放完，切换下一首
@@ -73,9 +73,9 @@ func main() {
 				fmt.Scanln(&oprNum)
 				fmt.Println("输入：", oprNum)
 				opr <- oprNum
-			} else {
-				fmt.Print("stop")
-				time.Sleep(1 * time.Second)
+				if oprNum == 3 {
+					isInput <- 1
+				}
 			}
 
 		}
@@ -112,21 +112,27 @@ func main() {
 			// 切换歌单
 			case 3:
 				// todo 需要修复输入歌单bug
-				fmt.Print("请输入歌单txt")
+				fmt.Print("请输入歌单txt:")
 				songListPath := ""
-
 				fmt.Scanln(&songListPath)
-
-				fmt.Printf("songList: %v", &songListPath)
-				if songListPath == "" {
-					songListPath = "entity/自定义-许嵩.txt"
+				for {
+					if songListPath == "" {
+						songListPath = "entity/自定义-许嵩.txt"
+					}
+					if !playList.SetList(songListPath) {
+						fmt.Printf("输入错误，请重新输入:")
+						songListPath = ""
+						fmt.Scanln(&songListPath)
+						continue
+					}
+					if playList.SongNames != nil {
+						allSongList = playList.SongNames
+						currentIndex = -1
+						player.changeSong(&currentIndex, 0)
+						break
+					}
 				}
-				playList.SetList(songListPath)
-				if playList.SongNames != nil {
-					allSongList = playList.SongNames
-					currentIndex = -1
-					player.changeSong(&currentIndex, 0)
-				}
+				<-isInput
 
 			}
 
