@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -40,23 +41,23 @@ func newPlayer() *Player {
 }
 
 // 下一首歌的切换逻辑：随机-顺序-循环
-func nextSong(currentIndex int) beep.StreamSeekCloser {
+func nextSong(currentIndex *int) beep.StreamSeekCloser {
 	audioFiles := []string{
-		"resources/sound_sculptors.mp3",
-		"resources/瑶山遗韵.mp3",
-		"resources/霞据云佩.mp3",
+		"resources/sound-sculptors.mp3",
+		"resources/瑶山遗韵.mp3", // 02:14
+		"resources/霞据云佩.mp3", // 02:11
 	}
 
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
-	if currentIndex >= len(audioFiles)-1 {
+	if *currentIndex >= len(audioFiles)-1 {
 		// 如果没有更多的文件，将currentIndex置为-1
-		currentIndex = -1
+		*currentIndex = -1
 	}
 
-	currentIndex++
+	*currentIndex++
 
 	// 打开当前索引的音频文件
-	file, err := os.Open(audioFiles[currentIndex])
+	file, err := os.Open(audioFiles[*currentIndex])
 	if err != nil {
 		log.Printf("Failed to open audio file: %v", err)
 		return nil
@@ -68,13 +69,14 @@ func nextSong(currentIndex int) beep.StreamSeekCloser {
 		log.Printf("Failed to decode audio file: %v", err)
 		return nil
 	}
+	fmt.Printf("playing... %v \n", strings.Split(audioFiles[*currentIndex], "/")[1])
 
 	return streamer
 
 }
 
 // 播放器切歌逻辑
-func (p *Player) changeSong(currentIndex int) {
+func (p *Player) changeSong(currentIndex *int) {
 	speaker.Clear()
 
 	// 拿到下一次的streamer
