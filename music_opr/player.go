@@ -48,7 +48,7 @@ func nextSong(currentIndex int) beep.StreamSeekCloser {
 	}
 
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
-	if currentIndex >= len(audioFiles) {
+	if currentIndex >= len(audioFiles)-1 {
 		// 如果没有更多的文件，将currentIndex置为-1
 		currentIndex = -1
 	}
