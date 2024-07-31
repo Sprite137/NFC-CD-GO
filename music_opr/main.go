@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// 打开音乐文件
-	file, err := os.Open("resources/sound_sculptors.mp3")
+	file, err := os.Open("resources/sound-sculptors.mp3")
 	if err != nil {
 		log.Fatal("读取file错误")
 	}
@@ -32,7 +32,7 @@ func main() {
 			// 当前音乐播放完，切换下一首
 			if player.isDone() {
 				fmt.Println("正在切换下一首...")
-				player.changeSong(currentIndex)
+				player.changeSong(&currentIndex)
 				currentIndex++
 			}
 		}
