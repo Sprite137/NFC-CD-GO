@@ -44,7 +44,7 @@ func main() {
 	go func() {
 		for {
 			if player.ctrl.Paused != true {
-				//fmt.Print(player.currentPosition(), "\n")
+				fmt.Print(player.currentPosition(), "\n")
 				time.Sleep(1 * time.Second)
 			}
 			// 当前音乐播放完，切换下一首
@@ -71,7 +71,6 @@ func main() {
 		for {
 			if len(isInput) == 0 {
 				fmt.Scanln(&oprNum)
-				fmt.Println("输入：", oprNum)
 				opr <- oprNum
 				if oprNum == 3 {
 					isInput <- 1
@@ -84,10 +83,7 @@ func main() {
 	// 起协程来处理opr
 	go func() {
 		for {
-
 			n := <-opr
-			fmt.Println("获取：", n)
-
 			switch n {
 
 			// 暂停，恢复
