@@ -23,7 +23,7 @@ IterFunc ：定义了一个名为IterFunc的新类型，它是一个函数类型
 在Go中，函数本身也可以被当作类型来使用，这允许我们创建函数类型的变量，这些变量可以存储和传递函数。
 用于后续的音频迭代
 */
-type IterFunc func() beep.Streamer
+//type IterFunc func() beep.Streamer
 
 // Player 定义一个播放器
 type Player struct {
@@ -101,7 +101,10 @@ func (p *Player) reset() *Player {
 
 // 开启播放器：open方法初始化音频输出设备，并开始播放音频。
 func (p *Player) open() *Player {
-	speaker.Init(targetFormat.SampleRate, targetFormat.NumChannels)
+	err := speaker.Init(targetFormat.SampleRate, targetFormat.NumChannels)
+	if err != nil {
+		return nil
+	}
 	speaker.Play(p.ctrl)
 	return p
 }
