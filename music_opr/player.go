@@ -14,7 +14,7 @@ import (
 )
 
 var targetFormat = beep.Format{
-	SampleRate:  44100,
+	SampleRate:  beep.SampleRate(44100),
 	NumChannels: 2,
 	Precision:   2,
 }
@@ -34,8 +34,8 @@ type Player struct {
 	currentStream beep.StreamSeeker // 当前音频流的位置
 }
 
-// 创建一个播放器
-func newPlayer() *Player {
+// NewPlayer 创建一个播放器
+func NewPlayer() *Player {
 	p := &Player{}
 	return p.reset()
 }
@@ -101,12 +101,9 @@ func (p *Player) reset() *Player {
 	return p
 }
 
-// 开启播放器：open方法初始化音频输出设备，并开始播放音频。
-func (p *Player) open() *Player {
-	err := speaker.Init(targetFormat.SampleRate, targetFormat.NumChannels)
-	if err != nil {
-		return nil
-	}
+// Open 开启播放器：open方法初始化音频输出设备，并开始播放音频。
+func (p *Player) Open() *Player {
+	speaker.Init(targetFormat.SampleRate, targetFormat.SampleRate.N(time.Second/10))
 	speaker.Play(p.ctrl)
 	return p
 }
@@ -124,13 +121,13 @@ func (p *Player) togglePlay() {
 	speaker.Unlock()
 }
 
-// 解码一个mp3文件，设置player当前的参数
-func (p *Player) playMp3(file io.ReadCloser) beep.Streamer {
+// PlayMp3 解码一个mp3文件，设置player当前的参数
+func (p *Player) PlayMp3(file io.ReadCloser) beep.Streamer {
 	streamer, _, err := mp3.Decode(file)
 	if err != nil {
+		log.Fatal("mp3 decode failed:", err)
 		return nil
 	}
-
 	p.streamer = streamer      // 如果没设置会runtime error: invalid memory address or nil pointer dereference
 	p.currentStream = streamer // 方便记录currentPosition()
 	p.ctrl = &beep.Ctrl{Streamer: p.streamer}
@@ -153,5 +150,6 @@ func (p *Player) currentPosition() string {
 
 // 当前音乐是否播放完
 func (p *Player) isDone() bool {
-	return p.currentStream.Position() == p.currentStream.Len()
+	// 增加容错，两者不会严格相等
+	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.99
 }
