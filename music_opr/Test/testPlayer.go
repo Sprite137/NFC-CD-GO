@@ -1,11 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
-	"log"
-	"os"
 )
 
 func main() {
@@ -57,25 +53,11 @@ func main() {
 	//
 	//select {}
 
-	fileHandle, err := os.OpenFile("resources/songList.txt", os.O_RDONLY, 0666)
-	if err != nil {
-		log.Fatal("读取songList文件错误")
-	}
+	fmt.Printf("请输入歌单txt:")
 
-	defer fileHandle.Close()
-
-	reader := bufio.NewReader(fileHandle)
-
-	var results []string
-	// 按行处理txt
-	for {
-		line, _, err := reader.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		results = append(results, string(line))
-	}
-	fmt.Printf("read result:%v\n", results)
+	songListPath := ""
+	fmt.Scanln(&songListPath)
+	fmt.Printf(songListPath)
 
 }
 
