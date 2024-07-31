@@ -44,8 +44,8 @@ func newPlayer() *Player {
 func nextSong(currentIndex *int) beep.StreamSeekCloser {
 	audioFiles := []string{
 		"resources/sound-sculptors.mp3",
-		"resources/瑶山遗韵.mp3", // 02:14
-		"resources/霞据云佩.mp3", // 02:11
+		"resources/jazz-logo.mp3",          // 00:13
+		"resources/carol-of-the-bells.mp3", // 00:17
 	}
 
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
