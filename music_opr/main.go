@@ -9,27 +9,28 @@ import (
 
 func main() {
 	// 打开音乐文件
-	file, err := os.Open("resources/sound-sculptors.mp3")
+	file, err := os.Open("resources/jazz-logo.mp3")
 	if err != nil {
 		log.Fatal("读取file错误")
 	}
 	defer file.Close()
 
-	player := newPlayer()
+	// new一个播放器
+	player := NewPlayer()
 
-	player.playMp3(file)
-	if player.streamer == nil {
-		log.Fatal("Failed to decode the audio file")
-	}
+	// 设置播放的音乐
+	player.PlayMp3(file)
 
-	player.open() // 初始化音频输出设备
+	// 开始播放
+	player.Open()
 
+	// 打印歌曲进度，切换下一首
 	currentIndex := 0
 	go func() {
 		for {
 			if player.ctrl.Paused != true {
-				time.Sleep(1 * time.Second)
 				fmt.Print(player.currentPosition(), "\n")
+				time.Sleep(1 * time.Second)
 			}
 			// 当前音乐播放完，切换下一首
 			if player.isDone() {
@@ -55,6 +56,7 @@ func main() {
 		}
 	}()
 
+	// 起协程来处理opr
 	go func() {
 		for {
 			n := <-opr
