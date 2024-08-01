@@ -18,7 +18,7 @@ func TestGin(t *testing.T) {
 	router.GET("/getReq", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, map[string]interface{}{
 			"code": 0,
-			"rsp":  fmt.Sprintf("更换专辑:resources/songList.txt"),
+			"rsp":  fmt.Sprintf("1"),
 		})
 	})
 
