@@ -90,7 +90,6 @@ func nextSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 		log.Printf("Failed to decode audio file: %v", err)
 		return nil, ""
 	}
-	//fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
 
 	return streamer, strings.Split(allSongList[*currentIndex], "/")[1]
 
@@ -119,7 +118,6 @@ func previousSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 		log.Printf("Failed to decode audio file: %v", err)
 		return nil, ""
 	}
-	//fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
 
 	return streamer, strings.Split(allSongList[*currentIndex], "/")[1]
 }
@@ -147,6 +145,7 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 
 	length := targetFormat.SampleRate.D(p.currentStream.Len()) / time.Second
 	bar = getBar(int(length), songName)
+	fmt.Printf("playing %v \n", songName)
 
 	speaker.Play(p.ctrl)
 }
