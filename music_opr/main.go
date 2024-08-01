@@ -19,14 +19,17 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionShowBytes(false),
 		progressbar.OptionSetWidth(50),
-		progressbar.OptionSetDescription(fmt.Sprintf("playing %s...", songName)),
+		progressbar.OptionShowDescriptionAtLineEnd(),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "[green]-[reset]",
 			SaucerHead:    "[green]>[reset]",
 			SaucerPadding: "[red]-[reset]",
 			BarStart:      "[",
 			BarEnd:        "]",
-		}))
+		}),
+		progressbar.OptionSetPredictTime(false),
+		//progressbar.OptionClearOnFinish(),
+	)
 	return bar
 }
 
@@ -46,6 +49,7 @@ func main() {
 
 	// 开始播放
 	player.Open()
+	fmt.Printf("playing %v \n", strings.Split(file.Name(), "/")[1])
 	//player.togglePlay()
 
 	// 打印歌曲进度，切换下一首
@@ -68,12 +72,13 @@ func main() {
 		for {
 			if player.ctrl.Paused != true {
 				//fmt.Print(player.currentPosition(), "\n")
+				bar.Describe(fmt.Sprintf("playing    当前进度：%v", player.currentPosition()))
 				bar.Add(1)
 				time.Sleep(1 * time.Second)
 			}
 			// 当前音乐播放完，切换下一首
 			if player.isDone() {
-				fmt.Println("\n正在切换下一首...")
+				fmt.Println("正在切换下一首...")
 				player.changeSong(&currentIndex, 0)
 			}
 		}
