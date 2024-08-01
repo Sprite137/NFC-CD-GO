@@ -70,7 +70,7 @@ func getRandomIndex() int {
 func NewPlayer() *Player {
 	p := &Player{}
 	allSongList = getAllSongList()
-	p.playLogic = enum.LOOP
+	p.playLogic = enum.ORDER
 	return p.reset()
 }
 
@@ -228,4 +228,12 @@ func (p *Player) currentPosition() string {
 func (p *Player) isDone() bool {
 	// 增加容错，两者不会严格相等
 	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.99
+}
+
+func (p *Player) changePlayLogic() {
+	if p.playLogic == 2 {
+		p.playLogic = 0
+	} else {
+		p.playLogic++
+	}
 }

@@ -97,6 +97,7 @@ func main() {
 		//fmt.Println("1. 下一首")
 		//fmt.Println("2. 上一首")
 		//fmt.Println("3. 切换歌单")
+		//fmt.Println("4. 切换播放逻辑 顺序-随机-循环")
 		//fmt.Println("输入")
 		for {
 			if len(isInput) == 0 {
@@ -158,6 +159,10 @@ func main() {
 					}
 				}
 				<-isInput
+			// 切换播放逻辑
+			case 4:
+				player.changePlayLogic()
+				fmt.Printf("已切换当前播放逻辑为%s", player.playLogic)
 
 			}
 
