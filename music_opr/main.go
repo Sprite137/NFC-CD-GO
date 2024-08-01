@@ -3,10 +3,32 @@ package main
 import (
 	"example.com/m/entity"
 	"fmt"
+	"github.com/k0kubun/go-ansi"
+	"github.com/schollz/progressbar/v3"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
+
+var bar *progressbar.ProgressBar
+
+func getBar(length int, songName string) *progressbar.ProgressBar {
+	bar = progressbar.NewOptions(length,
+		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionShowBytes(false),
+		progressbar.OptionSetWidth(50),
+		progressbar.OptionSetDescription(fmt.Sprintf("playing %s...", songName)),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]-[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: "[red]-[reset]",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}))
+	return bar
+}
 
 func main() {
 	// 打开音乐文件
@@ -39,17 +61,19 @@ func main() {
 			break
 		}
 	}
-
+	length := targetFormat.SampleRate.D(player.currentStream.Len()) / time.Second
+	bar = getBar(int(length), strings.Split(file.Name(), "/")[1])
 	// 打印歌曲进度，播放切换下一首
 	go func() {
 		for {
 			if player.ctrl.Paused != true {
-				fmt.Print(player.currentPosition(), "\n")
+				//fmt.Print(player.currentPosition(), "\n")
+				bar.Add(1)
 				time.Sleep(1 * time.Second)
 			}
 			// 当前音乐播放完，切换下一首
 			if player.isDone() {
-				fmt.Println("正在切换下一首...")
+				fmt.Println("\n正在切换下一首...")
 				player.changeSong(&currentIndex, 0)
 			}
 		}

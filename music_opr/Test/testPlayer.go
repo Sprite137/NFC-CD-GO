@@ -1,7 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/k0kubun/go-ansi"
+	"github.com/schollz/progressbar/v3"
+	"time"
 )
 
 func main() {
@@ -53,11 +55,23 @@ func main() {
 	//
 	//select {}
 
-	fmt.Printf("请输入歌单txt:")
-
-	songListPath := ""
-	fmt.Scanln(&songListPath)
-	fmt.Printf(songListPath)
+	bar := progressbar.NewOptions(1000,
+		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionShowBytes(true),
+		progressbar.OptionSetWidth(50),
+		progressbar.OptionSetDescription("playing..."),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]=[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: " ",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}))
+	for i := 0; i < 1000; i++ {
+		bar.Add(1)
+		time.Sleep(5 * time.Millisecond)
+	}
 
 }
 
