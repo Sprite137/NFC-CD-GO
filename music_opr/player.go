@@ -67,7 +67,7 @@ func NewPlayer() *Player {
 }
 
 // 下一首歌的切换逻辑：随机-顺序-循环
-func nextSong(currentIndex *int) beep.StreamSeekCloser {
+func nextSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
 	if *currentIndex >= len(allSongList)-1 {
@@ -81,23 +81,23 @@ func nextSong(currentIndex *int) beep.StreamSeekCloser {
 	file, err := os.Open(allSongList[*currentIndex])
 	if err != nil {
 		log.Printf("Failed to open audio file: %v", err)
-		return nil
+		return nil, ""
 	}
 
 	// 解码音频文件并返回streamer
 	streamer, _, err := mp3.Decode(file)
 	if err != nil {
 		log.Printf("Failed to decode audio file: %v", err)
-		return nil
+		return nil, ""
 	}
-	fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
+	//fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
 
-	return streamer
+	return streamer, strings.Split(allSongList[*currentIndex], "/")[1]
 
 }
 
 // 上一首的切歌逻辑
-func previousSong(currentIndex *int) beep.StreamSeekCloser {
+func previousSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
 	if *currentIndex == 0 {
 		// 如果没有上一首，将currentIndex置为len(allSongList的长度)
@@ -110,18 +110,18 @@ func previousSong(currentIndex *int) beep.StreamSeekCloser {
 	file, err := os.Open(allSongList[*currentIndex])
 	if err != nil {
 		log.Printf("Failed to open audio file: %v", err)
-		return nil
+		return nil, ""
 	}
 
 	// 解码音频文件并返回streamer
 	streamer, _, err := mp3.Decode(file)
 	if err != nil {
 		log.Printf("Failed to decode audio file: %v", err)
-		return nil
+		return nil, ""
 	}
-	fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
+	//fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
 
-	return streamer
+	return streamer, strings.Split(allSongList[*currentIndex], "/")[1]
 }
 
 // 播放器切歌逻辑
@@ -129,11 +129,12 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	speaker.Clear()
 
 	var streamer beep.StreamSeekCloser
+	songName := ""
 	// 拿到下一首的streamer
 	if changeLogic == 0 {
-		streamer = nextSong(currentIndex)
+		streamer, songName = nextSong(currentIndex)
 	} else if changeLogic == 1 {
-		streamer = previousSong(currentIndex)
+		streamer, songName = previousSong(currentIndex)
 	}
 
 	// 更新currentStream
@@ -143,6 +144,9 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	p.streamer = streamer
 
 	p.ctrl = &beep.Ctrl{Streamer: p.streamer}
+
+	length := targetFormat.SampleRate.D(p.currentStream.Len()) / time.Second
+	bar = getBar(int(length), songName)
 
 	speaker.Play(p.ctrl)
 }
