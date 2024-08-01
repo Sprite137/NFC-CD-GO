@@ -18,7 +18,7 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionShowBytes(false),
-		progressbar.OptionSetWidth(50),
+		progressbar.OptionFullWidth(),
 		progressbar.OptionShowDescriptionAtLineEnd(),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "[green]-[reset]",
@@ -35,7 +35,7 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 
 func main() {
 	// 打开音乐文件
-	file, err := os.Open("resources/jazz-logo.mp3")
+	file, err := os.Open("resources/如果当时-许嵩.mp3")
 	if err != nil {
 		log.Fatal("读取file错误", err)
 	}
@@ -162,8 +162,6 @@ func main() {
 			// 切换播放逻辑
 			case 4:
 				player.changePlayLogic()
-				fmt.Printf("已切换当前播放逻辑为%s", player.playLogic)
-
 			}
 
 		}

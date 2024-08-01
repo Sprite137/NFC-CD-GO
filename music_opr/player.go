@@ -25,7 +25,7 @@ var targetFormat = beep.Format{
 var allSongList []string
 
 func getAllSongList() []string {
-	fileHandle, err := os.OpenFile("resources/songList.txt", os.O_RDONLY, 0666)
+	fileHandle, err := os.OpenFile("resources/自定义-许嵩.txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Fatal("读取songList文件错误")
 	}
@@ -151,7 +151,12 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 		streamer, songName = p.previousSong(currentIndex)
 	} else if changeLogic == 3 {
 		// LOOP情况下被动切换下一首：触发循环
-		streamer, songName = p.nextSong(currentIndex, 1)
+		if p.playLogic == enum.LOOP {
+			streamer, songName = p.nextSong(currentIndex, 1)
+		} else {
+			streamer, songName = p.nextSong(currentIndex, 0)
+		}
+
 	}
 
 	// 更新currentStream
@@ -236,4 +241,5 @@ func (p *Player) changePlayLogic() {
 	} else {
 		p.playLogic++
 	}
+	fmt.Printf("已切换当前播放逻辑为%s \n ", enum.LogicType(p.playLogic))
 }
