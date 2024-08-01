@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"math/rand"
-)
+import "strings"
 
 func main() {
 	//file, err := os.Open("resources/霞据云佩.mp3")
@@ -54,8 +51,11 @@ func main() {
 	//
 	//select {}
 
-	for i := 0; i < 100; i++ {
-		fmt.Print(rand.Intn(10), "\n")
+	a := "更换专辑:12345"
+
+	switch {
+	case strings.Contains(a, "更换专辑"):
+		print(strings.Split(a, ":")[1])
 	}
 
 }

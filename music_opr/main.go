@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var isListening = false
+
 var bar *progressbar.ProgressBar
 
 func getBar(length int, songName string) *progressbar.ProgressBar {
@@ -87,6 +89,21 @@ func main() {
 
 	// 起协程获取opr
 	opr := make(chan interface{})
+
+	// 起协程监听网址的变化
+	if isListening {
+		go func() {
+			for {
+				if GetReq() == "1" {
+					opr <- 1
+				} else {
+					fmt.Printf("req!=1,=%v \n", GetReq())
+				}
+				time.Sleep(500 * time.Microsecond)
+			}
+
+		}()
+	}
 
 	isInput := make(chan int, 1)
 
