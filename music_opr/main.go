@@ -79,7 +79,8 @@ func main() {
 			// 当前音乐播放完，切换下一首
 			if player.isDone() {
 				fmt.Println("正在切换下一首...")
-				player.changeSong(&currentIndex, 0)
+				// 3表明是播放完切换下一首，便于LOOP时切换下一首
+				player.changeSong(&currentIndex, 3)
 			}
 		}
 	}()

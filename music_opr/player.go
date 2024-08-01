@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"example.com/m/entity/enum"
 	"fmt"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
@@ -9,6 +10,7 @@ import (
 	"github.com/faiface/beep/speaker"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -57,17 +59,23 @@ type Player struct {
 	volume        *effects.Volume   // 音量控制
 	streamer      beep.Streamer     // 当前音频流
 	currentStream beep.StreamSeeker // 当前音频流的位置
+	playLogic     int               // 播放逻辑：0-顺序播放，1-随机播放，2-单曲循环
+}
+
+func getRandomIndex() int {
+	return rand.Intn(len(allSongList))
 }
 
 // NewPlayer 创建一个播放器
 func NewPlayer() *Player {
 	p := &Player{}
 	allSongList = getAllSongList()
+	p.playLogic = enum.LOOP
 	return p.reset()
 }
 
 // 下一首歌的切换逻辑：随机-顺序-循环
-func nextSong(currentIndex *int) (beep.StreamSeekCloser, string) {
+func (p *Player) nextSong(currentIndex *int, isDone int) (beep.StreamSeekCloser, string) {
 
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
 	if *currentIndex >= len(allSongList)-1 {
@@ -75,7 +83,10 @@ func nextSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 		*currentIndex = -1
 	}
 
-	*currentIndex++
+	// 不是LOOP情况被动切歌才+1
+	if isDone == 0 {
+		*currentIndex++
+	}
 
 	// 打开当前索引的音频文件
 	file, err := os.Open(allSongList[*currentIndex])
@@ -96,7 +107,7 @@ func nextSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 }
 
 // 上一首的切歌逻辑
-func previousSong(currentIndex *int) (beep.StreamSeekCloser, string) {
+func (p *Player) previousSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
 	if *currentIndex == 0 {
 		// 如果没有上一首，将currentIndex置为len(allSongList的长度)
@@ -129,10 +140,18 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	var streamer beep.StreamSeekCloser
 	songName := ""
 	// 拿到下一首的streamer
+
+	// RANDOM就对currentIndex随机
+	if p.playLogic == enum.RANDOM {
+		*currentIndex = getRandomIndex()
+	}
 	if changeLogic == 0 {
-		streamer, songName = nextSong(currentIndex)
+		streamer, songName = p.nextSong(currentIndex, 0)
 	} else if changeLogic == 1 {
-		streamer, songName = previousSong(currentIndex)
+		streamer, songName = p.previousSong(currentIndex)
+	} else if changeLogic == 3 {
+		// LOOP情况下被动切换下一首：触发循环
+		streamer, songName = p.nextSong(currentIndex, 1)
 	}
 
 	// 更新currentStream
