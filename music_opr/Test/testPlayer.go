@@ -51,7 +51,7 @@ func main() {
 	//
 	//select {}
 
-	a := "更换专辑:12345"
+	a := "更换专辑:resources/songList.txt"
 
 	switch {
 	case strings.Contains(a, "更换专辑"):

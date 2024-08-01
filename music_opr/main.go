@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var isListening = false
+var isListening = true
 
 var bar *progressbar.ProgressBar
 
@@ -90,16 +90,16 @@ func main() {
 	// 起协程获取opr
 	opr := make(chan interface{})
 
+	oprWebChan := make(chan string)
+
 	// 起协程监听网址的变化
 	if isListening {
 		go func() {
+			time.Sleep(10 * time.Second)
 			for {
-				if GetReq() == "1" {
-					opr <- 1
-				} else {
-					fmt.Printf("req!=1,=%v \n", GetReq())
-				}
-				time.Sleep(500 * time.Microsecond)
+				oprWebChan <- GetReq()
+				print("getReq \n")
+				time.Sleep(500 * time.Second)
 			}
 
 		}()
@@ -160,7 +160,7 @@ func main() {
 				fmt.Scanln(&songListPath)
 				for {
 					if songListPath == "" {
-						songListPath = "entity/自定义-许嵩.txt"
+						songListPath = "resources/自定义-许嵩.txt"
 					}
 					if !playList.SetList(songListPath) {
 						fmt.Printf("输入错误，请重新输入:")
@@ -183,6 +183,21 @@ func main() {
 
 		}
 
+	}()
+
+	go func() {
+		for {
+			oprWeb := <-oprWebChan
+			switch {
+			case strings.Contains(oprWeb, "更换专辑"):
+				playList.SetList(strings.Split(oprWeb, ":")[1])
+				if playList.SongNames != nil {
+					allSongList = playList.SongNames
+					currentIndex = -1
+					player.changeSong(&currentIndex, 0)
+				}
+			}
+		}
 	}()
 
 	select {}
