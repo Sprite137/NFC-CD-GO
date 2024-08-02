@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example.com/m/entity"
+	_const "example.com/m/entity/const"
 	myUtil "example.com/m/util"
 	"fmt"
 	"github.com/k0kubun/go-ansi"
@@ -14,7 +14,11 @@ import (
 
 var isListening = false
 
+var genAllSongTxt = false
+
 var bar *progressbar.ProgressBar
+
+var originSong = "jazz-logo.mp3"
 
 func getBar(length int, songName string) *progressbar.ProgressBar {
 	bar = progressbar.NewOptions(length,
@@ -37,8 +41,14 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 }
 
 func main() {
+
+	if genAllSongTxt {
+		myUtil.GetAllSongList()
+		return
+	}
+
 	// 打开音乐文件
-	file, err := os.Open("resources/jazz-logo.mp3")
+	file, err := os.Open(_const.SONGPATH + originSong)
 	if err != nil {
 		log.Fatal("读取file错误", err)
 	}
@@ -52,18 +62,15 @@ func main() {
 
 	// 开始播放
 	player.Open()
-	fmt.Printf("playing %v \n", strings.Split(file.Name(), "/")[1])
+	fmt.Printf("playing %v \n", strings.Split(file.Name(), "/")[2])
 	//player.togglePlay()
 
 	// 打印歌曲进度，切换下一首
 	currentIndex := 0
 
-	// 定义一份歌单
-	playList := entity.PlayList{}
-
 	// 获取当前歌曲在歌单的index
-	for i, songPath := range allSongList {
-		if songPath == file.Name() {
+	for i, songName := range player.currentPlayList.SongNames {
+		if songName == originSong {
 			currentIndex = i
 			break
 		}
@@ -161,21 +168,21 @@ func main() {
 				fmt.Scanln(&songListPath)
 				for {
 					if songListPath == "" {
-						songListPath = "resources/自定义-许嵩.txt"
+						songListPath = "自定义-许嵩.txt"
 					}
-					if !playList.SetList(songListPath) {
+					if !player.currentPlayList.SetList(songListPath) {
 						fmt.Printf("输入错误，请重新输入:")
 						songListPath = ""
 						fmt.Scanln(&songListPath)
 						continue
 					}
-					if playList.SongNames != nil {
-						allSongList = playList.SongNames
+					if player.currentPlayList.SongNames != nil {
 						currentIndex = -1
 						player.changeSong(&currentIndex, 0)
 						break
 					}
 				}
+				fmt.Printf("已切换为歌单:%s \n", songListPath)
 				<-isInput
 			// 切换播放逻辑
 			case 4:
@@ -191,9 +198,8 @@ func main() {
 			oprWeb := <-oprWebChan
 			switch {
 			case strings.Contains(oprWeb, "更换专辑"):
-				playList.SetList(strings.Split(oprWeb, ":")[1])
-				if playList.SongNames != nil {
-					allSongList = playList.SongNames
+				player.currentPlayList.SetList(strings.Split(oprWeb, ":")[1])
+				if player.currentPlayList.SongNames != nil {
 					currentIndex = -1
 					player.changeSong(&currentIndex, 0)
 				}
