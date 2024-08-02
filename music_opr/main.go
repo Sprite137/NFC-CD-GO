@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var isListening = true
+var isListening = false
 
 var bar *progressbar.ProgressBar
 
@@ -38,7 +38,7 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 
 func main() {
 	// 打开音乐文件
-	file, err := os.Open("resources/如果当时-许嵩.mp3")
+	file, err := os.Open("resources/jazz-logo.mp3")
 	if err != nil {
 		log.Fatal("读取file错误", err)
 	}

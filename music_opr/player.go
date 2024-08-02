@@ -25,7 +25,7 @@ var targetFormat = beep.Format{
 var allSongList []string
 
 func getAllSongList() []string {
-	fileHandle, err := os.OpenFile("resources/自定义-许嵩.txt", os.O_RDONLY, 0666)
+	fileHandle, err := os.OpenFile("resources/songList.txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Fatal("读取songList文件错误")
 	}
@@ -91,10 +91,20 @@ func (p *Player) nextSong(currentIndex *int, isDone int) (beep.StreamSeekCloser,
 	// 打开当前索引的音频文件
 	file := os.Stdin
 	for {
-		*currentIndex = getRandomIndex()
+		if p.playLogic == enum.RANDOM {
+			*currentIndex = getRandomIndex()
+		}
+
 		tempFile, err := os.Open(allSongList[*currentIndex])
 		if err != nil {
-			log.Printf("Failed to open %v, auto change song", file.Name)
+			log.Printf("Failed to open %v, auto change song", allSongList[*currentIndex])
+			// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
+			if *currentIndex >= len(allSongList)-1 {
+				// 如果没有更多的文件，将currentIndex置为-1
+				*currentIndex = -1
+			}
+			*currentIndex++
+
 		} else {
 			file = tempFile
 			break
@@ -126,10 +136,18 @@ func (p *Player) previousSong(currentIndex *int) (beep.StreamSeekCloser, string)
 	// 打开当前索引的音频文件
 	file := os.Stdin
 	for {
-		*currentIndex = getRandomIndex()
+		if p.playLogic == enum.RANDOM {
+			*currentIndex = getRandomIndex()
+		}
 		tempFile, err := os.Open(allSongList[*currentIndex])
 		if err != nil {
-			log.Printf("Failed to open %v, auto change song", file.Name)
+			log.Printf("Failed to open %v, auto change song", allSongList[*currentIndex])
+			if *currentIndex == 0 {
+				// 如果没有上一首，将currentIndex置为len(allSongList的长度)
+				*currentIndex = len(allSongList)
+			}
+
+			*currentIndex--
 		} else {
 			file = tempFile
 			break
@@ -246,7 +264,7 @@ func (p *Player) currentPosition() string {
 // 当前音乐是否播放完
 func (p *Player) isDone() bool {
 	// 增加容错，两者不会严格相等
-	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.99
+	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.995
 }
 
 func (p *Player) changePlayLogic() {
