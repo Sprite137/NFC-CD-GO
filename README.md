@@ -8,4 +8,4 @@
 - [x] 通过channel监听网页模拟nfc的输入
 - [ ] 连接nfc
 - [x] 当txt音乐文件不在本地时，跳过播放切换
-- [ ] 根据resources下的mp3文件初始化txt文件
+- [x] 根据resources下的mp3文件初始化txt文件
