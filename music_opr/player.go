@@ -89,10 +89,17 @@ func (p *Player) nextSong(currentIndex *int, isDone int) (beep.StreamSeekCloser,
 	}
 
 	// 打开当前索引的音频文件
-	file, err := os.Open(allSongList[*currentIndex])
-	if err != nil {
-		log.Printf("Failed to open audio file: %v", err)
-		return nil, ""
+	file := os.Stdin
+	for {
+		*currentIndex = getRandomIndex()
+		tempFile, err := os.Open(allSongList[*currentIndex])
+		if err != nil {
+			log.Printf("Failed to open %v, auto change song", file.Name)
+		} else {
+			file = tempFile
+			break
+		}
+
 	}
 
 	// 解码音频文件并返回streamer
@@ -117,10 +124,17 @@ func (p *Player) previousSong(currentIndex *int) (beep.StreamSeekCloser, string)
 	*currentIndex--
 
 	// 打开当前索引的音频文件
-	file, err := os.Open(allSongList[*currentIndex])
-	if err != nil {
-		log.Printf("Failed to open audio file: %v", err)
-		return nil, ""
+	file := os.Stdin
+	for {
+		*currentIndex = getRandomIndex()
+		tempFile, err := os.Open(allSongList[*currentIndex])
+		if err != nil {
+			log.Printf("Failed to open %v, auto change song", file.Name)
+		} else {
+			file = tempFile
+			break
+		}
+
 	}
 
 	// 解码音频文件并返回streamer
