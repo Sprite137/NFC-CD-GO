@@ -41,6 +41,8 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 }
 
 func main() {
+	//print(nfc.Version())
+	//return
 
 	if genAllSongTxt {
 		myUtil.GetAllSongList()
