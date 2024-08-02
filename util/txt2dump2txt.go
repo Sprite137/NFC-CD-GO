@@ -1,4 +1,4 @@
-package util
+package main
 
 import (
 	"encoding/hex"
@@ -15,7 +15,7 @@ const (
 	blockSize = 16 // 每个块的大小为16字节
 )
 
-// M1CardMemory 模拟M1卡的内存结构
+// 模拟M1卡的内存结构
 type M1CardMemory struct {
 	Sectors [sectors][blocks][blockSize]byte
 }
@@ -126,7 +126,7 @@ func isValidUTF8(r rune) bool {
 	return r != '\uFFFD' && r != '\u0000'
 }
 
-//func main() {
-//	txt2dump()
-//	dump2txt()
-//}
+func main() {
+	txt2dump()
+	dump2txt()
+}
