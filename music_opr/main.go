@@ -2,6 +2,7 @@ package main
 
 import (
 	"example.com/m/entity"
+	"example.com/m/util"
 	"fmt"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
@@ -97,7 +98,7 @@ func main() {
 		go func() {
 			time.Sleep(10 * time.Second)
 			for {
-				oprWebChan <- GetReq()
+				oprWebChan <- util.GetReq()
 				print("getReq \n")
 				time.Sleep(500 * time.Second)
 			}
