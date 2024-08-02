@@ -2,6 +2,7 @@ package entity
 
 import (
 	"bufio"
+	_const "example.com/m/entity/const"
 	"io"
 	"os"
 )
@@ -33,7 +34,7 @@ func (p *PlayList) getNextSongIndex() int {
 
 // SetList 设置歌单的列表
 func (p *PlayList) SetList(filePath string) bool {
-	fileHandle, err := os.OpenFile(filePath, os.O_RDONLY, 0666)
+	fileHandle, err := os.OpenFile(_const.PLAYLISTPATH+filePath, os.O_RDONLY, 0666)
 	if err != nil {
 		//log.Fatal("读取songList文件错误", err)
 		return false
