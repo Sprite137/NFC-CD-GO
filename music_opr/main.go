@@ -4,6 +4,7 @@ import (
 	_const "example.com/m/entity/const"
 	myUtil "example.com/m/util"
 	"fmt"
+	"github.com/clausecker/nfc/v2"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"log"
@@ -41,8 +42,8 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 }
 
 func main() {
-	//print(nfc.Version())
-	//return
+	print(nfc.Version())
+	return
 
 	if genAllSongTxt {
 		myUtil.GetAllSongList()
