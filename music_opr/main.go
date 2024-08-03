@@ -44,7 +44,7 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 func main() {
 
 	// todo 关于不同OS的路径问题
-	var songPath = filepath.Join("/Users/xuzhi/Documents/work_project/NFC-CD-GO/resources", "music")
+	var songPath = filepath.Join("resources", "music")
 	// 定义文件路径
 	const filePath = "resources/playList/" + "allSongList.txt"
 
