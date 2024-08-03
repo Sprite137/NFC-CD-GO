@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -42,6 +43,10 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 }
 
 func main() {
+	separator := "/"
+	if runtime.GOOS == "windows" {
+		separator = "\\"
+	}
 
 	// todo 关于不同OS的路径问题
 	var songPath = filepath.Join("resources", "music")
@@ -53,6 +58,7 @@ func main() {
 	// 定义文件路径
 	const filePath = "resources/playList/" + "allSongList.txt"
 
+	print(filepath.Join(workingDir, songPath))
 	var allSongList []string
 	err := filepath.WalkDir(filepath.Join(workingDir, songPath), func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -61,8 +67,8 @@ func main() {
 		}
 
 		if !d.IsDir() && strings.Split(path, ".")[1] == "mp3" {
-			allSongList = append(allSongList, strings.Split(path, "\\")[2])
-			fmt.Println(strings.Split(path, "\\")[2])
+			allSongList = append(allSongList, strings.Split(path, separator)[len(strings.Split(path, separator))-1])
+			fmt.Println(strings.Split(path, separator)[len(strings.Split(path, separator))-1])
 		}
 
 		return nil
