@@ -8,7 +8,7 @@ import (
 )
 
 func GetAllSongList() {
-	const songPath = "resources/music/"
+	var songPath = filepath.Join("resources", "music")
 	// 定义文件路径
 	const filePath = "resources/playList/" + "allSongList.txt"
 

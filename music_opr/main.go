@@ -4,18 +4,18 @@ import (
 	_const "example.com/m/entity/const"
 	myUtil "example.com/m/util"
 	"fmt"
-	"github.com/clausecker/nfc/v2"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 var isListening = false
 
-var genAllSongTxt = false
+var genAllSongTxt = true
 
 var bar *progressbar.ProgressBar
 
@@ -42,8 +42,26 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 }
 
 func main() {
-	print(nfc.Version())
-	return
+
+	// todo 关于不同OS的路径问题
+	var songPath = filepath.Join("/Users/xuzhi/Documents/work_project/NFC-CD-GO/resources", "music")
+	// 定义文件路径
+	const filePath = "resources/playList/" + "allSongList.txt"
+
+	var allSongList []string
+	err := filepath.WalkDir(songPath, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		if !d.IsDir() && strings.Split(path, ".")[1] == "mp3" {
+			allSongList = append(allSongList, strings.Split(path, "\\")[2])
+			fmt.Println(strings.Split(path, "\\")[2])
+		}
+
+		return nil
+	})
 
 	if genAllSongTxt {
 		myUtil.GetAllSongList()
