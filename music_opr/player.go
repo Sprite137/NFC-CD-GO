@@ -244,7 +244,7 @@ func (p *Player) currentPosition() string {
 // 当前音乐是否播放完
 func (p *Player) isDone() bool {
 	// 增加容错，两者不会严格相等
-	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.995
+	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.997
 }
 
 func (p *Player) changePlayLogic() {
