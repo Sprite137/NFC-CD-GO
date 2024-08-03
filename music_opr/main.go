@@ -8,15 +8,13 @@ import (
 	"github.com/schollz/progressbar/v3"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 )
 
 var isListening = false
 
-var genAllSongTxt = true
+var genAllSongTxt = false
 
 var bar *progressbar.ProgressBar
 
@@ -43,40 +41,9 @@ func getBar(length int, songName string) *progressbar.ProgressBar {
 }
 
 func main() {
-	separator := "/"
-	if runtime.GOOS == "windows" {
-		separator = "\\"
-	}
-
-	// todo 关于不同OS的路径问题
-	var songPath = filepath.Join("resources", "music")
-
-	//print(songPath)
-	workingDir, _ := os.Getwd()
-	//fmt.Println("Current working directory:", workingDir)
-	//return
-	// 定义文件路径
-	const filePath = "resources/playList/" + "allSongList.txt"
-
-	print(filepath.Join(workingDir, songPath))
-	var allSongList []string
-	err := filepath.WalkDir(filepath.Join(workingDir, songPath), func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-
-		if !d.IsDir() && strings.Split(path, ".")[1] == "mp3" {
-			allSongList = append(allSongList, strings.Split(path, separator)[len(strings.Split(path, separator))-1])
-			fmt.Println(strings.Split(path, separator)[len(strings.Split(path, separator))-1])
-		}
-
-		return nil
-	})
 
 	if genAllSongTxt {
 		myUtil.GetAllSongList()
-		return
 	}
 
 	// 打开音乐文件

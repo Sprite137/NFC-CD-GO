@@ -4,24 +4,29 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
 func GetAllSongList() {
-	var songPath = filepath.Join("resources", "music")
-	// 定义文件路径
-	const filePath = "resources/playList/" + "allSongList.txt"
+	separator := "/"
+	if runtime.GOOS == "windows" {
+		separator = "\\"
+	}
 
+	var songPath = filepath.Join("resources", "music")
+	workingDir, _ := os.Getwd()
+	var filePath = filepath.Join("resources", "playList", "allSongList.txt")
 	var allSongList []string
-	err := filepath.WalkDir(songPath, func(path string, d os.DirEntry, err error) error {
+	err := filepath.WalkDir(filepath.Join(workingDir, songPath), func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
 
 		if !d.IsDir() && strings.Split(path, ".")[1] == "mp3" {
-			allSongList = append(allSongList, strings.Split(path, "\\")[2])
-			fmt.Println(strings.Split(path, "\\")[2])
+			allSongList = append(allSongList, strings.Split(path, separator)[len(strings.Split(path, separator))-1])
+			fmt.Println(strings.Split(path, separator)[len(strings.Split(path, separator))-1])
 		}
 
 		return nil
