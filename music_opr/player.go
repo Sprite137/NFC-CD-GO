@@ -1,7 +1,9 @@
 package main
 
 import (
-	"bufio"
+	"example.com/m/entity"
+	"example.com/m/entity/const"
+	"example.com/m/entity/enum"
 	"fmt"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
@@ -9,8 +11,8 @@ import (
 	"github.com/faiface/beep/speaker"
 	"io"
 	"log"
+	"math/rand"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -20,29 +22,7 @@ var targetFormat = beep.Format{
 	Precision:   2,
 }
 
-var allSongList []string
-
-func getAllSongList() []string {
-	fileHandle, err := os.OpenFile("resources/songList.txt", os.O_RDONLY, 0666)
-	if err != nil {
-		log.Fatal("读取songList文件错误")
-	}
-
-	defer fileHandle.Close()
-
-	reader := bufio.NewReader(fileHandle)
-
-	var results []string
-	// 按行处理txt
-	for {
-		line, _, err := reader.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		results = append(results, string(line))
-	}
-	return results
-}
+var originPlayList = "allSongList.txt"
 
 /*
 IterFunc ：定义了一个名为IterFunc的新类型，它是一个函数类型。
@@ -53,35 +33,63 @@ IterFunc ：定义了一个名为IterFunc的新类型，它是一个函数类型
 
 // Player 定义一个播放器
 type Player struct {
-	ctrl          *beep.Ctrl        // 控制播放
-	volume        *effects.Volume   // 音量控制
-	streamer      beep.Streamer     // 当前音频流
-	currentStream beep.StreamSeeker // 当前音频流的位置
+	ctrl            *beep.Ctrl        // 控制播放
+	volume          *effects.Volume   // 音量控制
+	streamer        beep.Streamer     // 当前音频流
+	currentStream   beep.StreamSeeker // 当前音频流的位置
+	playLogic       int               // 播放逻辑：0-顺序播放，1-随机播放，2-单曲循环
+	currentPlayList *entity.PlayList  // 当前的播放歌单
+}
+
+func (p *Player) getRandomIndex() int {
+	return rand.Intn(len(p.currentPlayList.SongNames))
 }
 
 // NewPlayer 创建一个播放器
 func NewPlayer() *Player {
 	p := &Player{}
-	allSongList = getAllSongList()
+	p.currentPlayList = &entity.PlayList{}
+	p.currentPlayList.SetList(originPlayList)
+	p.playLogic = enum.ORDER
 	return p.reset()
 }
 
 // 下一首歌的切换逻辑：随机-顺序-循环
-func nextSong(currentIndex *int) (beep.StreamSeekCloser, string) {
+func (p *Player) nextSong(currentIndex *int, isDone int) (beep.StreamSeekCloser, string) {
 
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
-	if *currentIndex >= len(allSongList)-1 {
+	if *currentIndex >= len(p.currentPlayList.SongNames)-1 {
 		// 如果没有更多的文件，将currentIndex置为-1
 		*currentIndex = -1
 	}
 
-	*currentIndex++
+	// 不是LOOP情况被动切歌才+1
+	if isDone == 0 {
+		*currentIndex++
+	}
 
 	// 打开当前索引的音频文件
-	file, err := os.Open(allSongList[*currentIndex])
-	if err != nil {
-		log.Printf("Failed to open audio file: %v", err)
-		return nil, ""
+	file := os.Stdin
+	for {
+		if p.playLogic == enum.RANDOM {
+			*currentIndex = p.getRandomIndex()
+		}
+
+		tempFile, err := os.Open(_const.SONGPATH + p.currentPlayList.SongNames[*currentIndex])
+		if err != nil {
+			log.Printf("Failed to open %v, auto change song", p.currentPlayList.SongNames[*currentIndex])
+			// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
+			if *currentIndex >= len(p.currentPlayList.SongNames)-1 {
+				// 如果没有更多的文件，将currentIndex置为-1
+				*currentIndex = -1
+			}
+			*currentIndex++
+
+		} else {
+			file = tempFile
+			break
+		}
+
 	}
 
 	// 解码音频文件并返回streamer
@@ -90,27 +98,41 @@ func nextSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 		log.Printf("Failed to decode audio file: %v", err)
 		return nil, ""
 	}
-	//fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
 
-	return streamer, strings.Split(allSongList[*currentIndex], "/")[1]
+	return streamer, p.currentPlayList.SongNames[*currentIndex]
 
 }
 
 // 上一首的切歌逻辑
-func previousSong(currentIndex *int) (beep.StreamSeekCloser, string) {
+func (p *Player) previousSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 	// 这个函数每次被调用时，都会尝试加载列表中的下一个音频文件
 	if *currentIndex == 0 {
 		// 如果没有上一首，将currentIndex置为len(allSongList的长度)
-		*currentIndex = len(allSongList)
+		*currentIndex = len(p.currentPlayList.SongNames)
 	}
 
 	*currentIndex--
 
 	// 打开当前索引的音频文件
-	file, err := os.Open(allSongList[*currentIndex])
-	if err != nil {
-		log.Printf("Failed to open audio file: %v", err)
-		return nil, ""
+	file := os.Stdin
+	for {
+		if p.playLogic == enum.RANDOM {
+			*currentIndex = p.getRandomIndex()
+		}
+		tempFile, err := os.Open(_const.SONGPATH + p.currentPlayList.SongNames[*currentIndex])
+		if err != nil {
+			log.Printf("Failed to open %v, auto change song", p.currentPlayList.SongNames[*currentIndex])
+			if *currentIndex == 0 {
+				// 如果没有上一首，将currentIndex置为len(allSongList的长度)
+				*currentIndex = len(p.currentPlayList.SongNames)
+			}
+
+			*currentIndex--
+		} else {
+			file = tempFile
+			break
+		}
+
 	}
 
 	// 解码音频文件并返回streamer
@@ -119,9 +141,8 @@ func previousSong(currentIndex *int) (beep.StreamSeekCloser, string) {
 		log.Printf("Failed to decode audio file: %v", err)
 		return nil, ""
 	}
-	//fmt.Printf("playing... %v \n", strings.Split(allSongList[*currentIndex], "/")[1])
 
-	return streamer, strings.Split(allSongList[*currentIndex], "/")[1]
+	return streamer, p.currentPlayList.SongNames[*currentIndex]
 }
 
 // 播放器切歌逻辑
@@ -131,10 +152,23 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	var streamer beep.StreamSeekCloser
 	songName := ""
 	// 拿到下一首的streamer
+
+	// RANDOM就对currentIndex随机
+	if p.playLogic == enum.RANDOM {
+		*currentIndex = p.getRandomIndex()
+	}
 	if changeLogic == 0 {
-		streamer, songName = nextSong(currentIndex)
+		streamer, songName = p.nextSong(currentIndex, 0)
 	} else if changeLogic == 1 {
-		streamer, songName = previousSong(currentIndex)
+		streamer, songName = p.previousSong(currentIndex)
+	} else if changeLogic == 3 {
+		// LOOP情况下被动切换下一首：触发循环
+		if p.playLogic == enum.LOOP {
+			streamer, songName = p.nextSong(currentIndex, 1)
+		} else {
+			streamer, songName = p.nextSong(currentIndex, 0)
+		}
+
 	}
 
 	// 更新currentStream
@@ -147,6 +181,7 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 
 	length := targetFormat.SampleRate.D(p.currentStream.Len()) / time.Second
 	bar = getBar(int(length), songName)
+	fmt.Printf("playing %v \n", songName)
 
 	speaker.Play(p.ctrl)
 }
@@ -209,5 +244,14 @@ func (p *Player) currentPosition() string {
 // 当前音乐是否播放完
 func (p *Player) isDone() bool {
 	// 增加容错，两者不会严格相等
-	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.99
+	return (float64(p.currentStream.Position()) / float64(p.currentStream.Len())) > 0.995
+}
+
+func (p *Player) changePlayLogic() {
+	if p.playLogic == 2 {
+		p.playLogic = 0
+	} else {
+		p.playLogic++
+	}
+	fmt.Printf("已切换当前播放逻辑为%s \n ", enum.LogicType(p.playLogic))
 }

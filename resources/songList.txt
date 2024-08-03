@@ -1,5 +1,0 @@
-resources/sound-sculptors.mp3
-resources/jazz-logo.mp3
-resources/carol-of-the-bells.mp3
-resources/瑶山遗韵.mp3
-resources/霞据云佩.mp3

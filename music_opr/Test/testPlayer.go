@@ -1,10 +1,6 @@
 package main
 
-import (
-	"github.com/k0kubun/go-ansi"
-	"github.com/schollz/progressbar/v3"
-	"time"
-)
+import "strings"
 
 func main() {
 	//file, err := os.Open("resources/霞据云佩.mp3")
@@ -55,22 +51,11 @@ func main() {
 	//
 	//select {}
 
-	bar := progressbar.NewOptions(1000,
-		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionShowBytes(true),
-		progressbar.OptionSetWidth(50),
-		progressbar.OptionSetDescription("playing..."),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "[green]=[reset]",
-			SaucerHead:    "[green]>[reset]",
-			SaucerPadding: " ",
-			BarStart:      "[",
-			BarEnd:        "]",
-		}))
-	for i := 0; i < 1000; i++ {
-		bar.Add(1)
-		time.Sleep(5 * time.Millisecond)
+	a := "更换专辑:resources/songList.txt"
+
+	switch {
+	case strings.Contains(a, "更换专辑"):
+		print(strings.Split(a, ":")[1])
 	}
 
 }

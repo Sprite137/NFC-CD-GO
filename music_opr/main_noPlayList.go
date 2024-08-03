@@ -27,7 +27,7 @@ func main_() {
 	// 打印歌曲进度，切换下一首
 	currentIndex := 0
 
-	for i, songPath := range allSongList {
+	for i, songPath := range player.currentPlayList.SongNames {
 		if songPath == file.Name() {
 			currentIndex = i
 			break
