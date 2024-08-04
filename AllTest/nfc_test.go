@@ -1,13 +1,12 @@
 package AllTest
 
 import (
-	"fmt"
-	"github.com/clausecker/nfc/v2"
+	_ "fmt"
 	"testing"
 )
 
 func TestNFC(t *testing.T) {
-	fmt.Println(nfc.Version())
+	//fmt.Println(nfc.Version())
 	//devices, err := nfc.ListDevices()
 	//if err != nil {
 	//	fmt.Print(err)
