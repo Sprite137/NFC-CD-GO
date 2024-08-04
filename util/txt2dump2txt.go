@@ -20,9 +20,7 @@ type M1CardMemory struct {
 	Sectors [sectors][blocks][blockSize]byte
 }
 
-func txt2dump() {
-	txtFilePath := "resources/songList.txt" // 你的txt文件路径
-	dumpFilePath := "m1_card.dump"          // 输出的M1卡dump文件路径
+func Txt2dump(txtFilePath, dumpFilePath string) {
 
 	// 读取txt文件内容
 	txtContent, err := ioutil.ReadFile(txtFilePath)
@@ -77,9 +75,7 @@ func serializeM1CardMemory(memory M1CardMemory) ([]byte, error) {
 	return serializedData, nil
 }
 
-func dump2txt() {
-	dumpFilePath := "m1_card.dump" // M1卡的dump文件路径
-	txtFilePath := "output.txt"    // 输出的txt文件路径
+func Dump2txt(txtFilePath, dumpFilePath string) {
 
 	// 读取dump文件内容
 	dumpData, err := ioutil.ReadFile(dumpFilePath)
@@ -96,34 +92,39 @@ func dump2txt() {
 		log.Fatalf("十六进制解码失败: %v", err)
 	}
 
-	// 构建最终的字符串，包括中文字符和换行符，排除无效的UTF-8字符
+	// 构建最终的字符串，只包含有效的 UTF-8 中文字符
 	var result strings.Builder
 	for len(byteData) > 0 {
 		r, size := utf8.DecodeRune(byteData)
-		if isValidUTF8(r) {
+		if isValidUTF8(r) && utf8.ValidRune(r) || r == '\n' {
 			result.WriteRune(r)
 		}
 		byteData = byteData[size:]
 	}
 
+	print("清理前的res", result.String(), "\n")
 	// 清理字符串，移除末尾的非预期字符
-	cleanResult := strings.Trim(result.String(), "\x00")
+	cleanResult := strings.TrimRight(result.String(), "\x00")
+	print("清理后的res", result.String(), "\n")
 
 	// 写入到txt文件
 	if err := ioutil.WriteFile(txtFilePath, []byte(cleanResult), 0644); err != nil {
-		log.Fatalf("写入txt文件失败: %v", err)
+		log.Fatalf("写入txt文件失败: %v \n", err)
 	}
 
-	fmt.Printf("转换完成，txt文件已保存为: %s\n", txtFilePath)
-
-	stringArray := strings.Split(result.String(), "\n")
-	fmt.Println(stringArray)
+	fmt.Printf("转换完成，txt文件已保存为: %s \n", txtFilePath)
 
 }
 
+//	func isValidUTF8(r rune) bool {
+//		// 排除非预期的UTF-8字符，只保留有效的UTF-8字符
+//		return r != '\uFFFD' && r != '\u0000'
+//	}
 func isValidUTF8(r rune) bool {
-	// 排除非预期的UTF-8字符，只保留有效的UTF-8字符
-	return r != '\uFFFD' && r != '\u0000'
+	return (r >= 0x4e00 && r <= 0x9fff) ||
+		(r >= 0x3400 && r <= 0x4dbf) ||
+		(r >= 0x20000 && r <= 0x2a6df)
+
 }
 
 //func main() {
