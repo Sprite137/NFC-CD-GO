@@ -21,6 +21,15 @@ var bar *progressbar.ProgressBar
 
 var originSong = "jazz-logo.mp3"
 
+var Modulations = []nfc.Modulation{
+	{Type: nfc.ISO14443a, BaudRate: nfc.Nbr106},
+	{Type: nfc.ISO14443b, BaudRate: nfc.Nbr106},
+	{Type: nfc.Felica, BaudRate: nfc.Nbr212},
+	{Type: nfc.Felica, BaudRate: nfc.Nbr424},
+	{Type: nfc.Jewel, BaudRate: nfc.Nbr106},
+	{Type: nfc.ISO14443biClass, BaudRate: nfc.Nbr106},
+}
+
 func getBar(length int, songName string) *progressbar.ProgressBar {
 	bar = progressbar.NewOptions(length,
 		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
@@ -110,7 +119,7 @@ func main() {
 			// 循环等待NFC消息
 			for {
 				// Poll for 300ms
-				tagCount, target, err := dev.InitiatorPollTarget(_const.Modulations, 1, 300*time.Millisecond)
+				tagCount, target, err := dev.InitiatorPollTarget(Modulations, 1, 300*time.Millisecond)
 				if err != nil {
 					log.Println("Error polling the reader", err)
 					continue
