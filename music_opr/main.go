@@ -162,12 +162,7 @@ func main() {
 
 			// 暂停，恢复
 			case 0:
-				player.togglePlay()
-				if player.ctrl.Paused {
-					fmt.Printf("paused...\n")
-				} else {
-					fmt.Printf("playing...\n")
-				}
+				player.playOrPause()
 
 			// 切为下一首
 			case 1:
@@ -223,6 +218,8 @@ func main() {
 					currentIndex = -1
 					player.changeSong(&currentIndex, 0)
 				}
+			case strings.Contains(Uid2SOngListMap[oprWeb], "暂停/播放"):
+				player.playOrPause()
 			}
 		}
 	}()

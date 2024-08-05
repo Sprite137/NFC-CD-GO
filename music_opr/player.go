@@ -255,3 +255,12 @@ func (p *Player) changePlayLogic() {
 	}
 	fmt.Printf("已切换当前播放逻辑为%s \n ", enum.LogicType(p.playLogic))
 }
+
+func (p *Player) playOrPause() {
+	p.togglePlay()
+	if p.ctrl.Paused {
+		fmt.Printf("paused...\n")
+	} else {
+		fmt.Printf("playing...\n")
+	}
+}
