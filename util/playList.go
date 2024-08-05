@@ -24,7 +24,7 @@ func GetAllSongList() {
 			return err
 		}
 
-		if !d.IsDir() && strings.Split(path, ".")[1] == "mp3" {
+		if !d.IsDir() && strings.Contains(path, ".mp3") {
 			allSongList = append(allSongList, strings.Split(path, separator)[len(strings.Split(path, separator))-1])
 			fmt.Println(strings.Split(path, separator)[len(strings.Split(path, separator))-1])
 		}
