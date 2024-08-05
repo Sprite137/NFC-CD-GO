@@ -4,6 +4,7 @@ import (
 	_const "example.com/m/entity/const"
 	myUtil "example.com/m/util"
 	"fmt"
+	"github.com/clausecker/nfc/v2"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"log"
@@ -97,16 +98,34 @@ func main() {
 	// 起协程获取opr
 	opr := make(chan interface{})
 
-	oprWebChan := make(chan string)
+	oprNFCChan := make(chan string)
 
 	// 起协程监听网址的变化
 	if isListening {
 		go func() {
-			time.Sleep(10 * time.Second)
+			dev, err := nfc.Open("")
+			if err != nil {
+				log.Fatal("打开NFC设备失败", err)
+			}
+			// 循环等待NFC消息
 			for {
-				oprWebChan <- myUtil.GetReq()
-				print("getReq \n")
-				time.Sleep(500 * time.Second)
+				// Poll for 300ms
+				tagCount, target, err := dev.InitiatorPollTarget(_const.Modulations, 1, 300*time.Millisecond)
+				if err != nil {
+					log.Println("Error polling the reader", err)
+					continue
+				}
+
+				// Check if a tag was detected
+				if tagCount > 0 {
+					Uid, err := myUtil.GetNfcUID(target)
+					if err != nil {
+						fmt.Printf("获取NFC卡Uid上失败%s \n", err)
+					}
+					oprNFCChan <- *Uid
+					fmt.Printf("获取NFC卡Uid上%s \n ", *Uid)
+				}
+
 			}
 
 		}()
@@ -192,12 +211,14 @@ func main() {
 
 	}()
 
+	Uid2SOngListMap := make(map[string]string)
+
 	go func() {
 		for {
-			oprWeb := <-oprWebChan
+			oprWeb := <-oprNFCChan
 			switch {
-			case strings.Contains(oprWeb, "更换专辑"):
-				player.currentPlayList.SetList(strings.Split(oprWeb, ":")[1])
+			case strings.Contains(Uid2SOngListMap[oprWeb], "更换专辑"):
+				player.currentPlayList.SetList(strings.Split(oprWeb, ":")[2])
 				if player.currentPlayList.SongNames != nil {
 					currentIndex = -1
 					player.changeSong(&currentIndex, 0)
