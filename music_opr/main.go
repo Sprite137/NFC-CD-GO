@@ -15,7 +15,7 @@ import (
 
 var isListening = true
 
-var genAllSongTxt = false
+var genAllSongTxt = true
 
 var bar *progressbar.ProgressBar
 
@@ -115,35 +115,33 @@ func main() {
 			// 打开NFC设备
 			dev, err := nfc.Open("")
 			if err != nil {
-				log.Fatal("打开NFC设备失败", err)
-			}
-			fmt.Print("请将NFC卡靠近NFC读卡器...")
-			defer dev.Close()
-
-			// 循环等待NFC消息
-			for {
-				// Poll for 300ms
-				tagCount, target, err := dev.InitiatorPollTarget(Modulations, 1, 300*time.Millisecond)
-				if err != nil {
-					log.Println("Error polling the reader", err)
-					continue
-				}
-
-				// Check if a tag was detected
-				if tagCount > 0 {
-					Uid, err := myUtil.GetNfcUID(target)
+				log.Println("nfc设备打开失败")
+			} else {
+				fmt.Print("请将NFC卡靠近NFC读卡器...")
+				// 循环等待NFC消息
+				for {
+					// Poll for 300ms
+					tagCount, target, _ := dev.InitiatorPollTarget(Modulations, 1, 300*time.Millisecond)
 					if err != nil {
-						fmt.Printf("获取NFC卡Uid上失败%s \n", err)
+						continue
 					}
-					oprNFCChan <- *Uid
-					fmt.Printf("获取NFC卡Uid上%s \n ", *Uid)
+
+					// Check if a tag was detected
+					if tagCount > 0 {
+						Uid, err := myUtil.GetNfcUID(target)
+						if err != nil {
+							fmt.Printf("获取NFC卡Uid上失败%s \n", err)
+						}
+						oprNFCChan <- *Uid
+						fmt.Printf("获取NFC卡Uid上%s \n ", *Uid)
+					}
+
+					// 休眠1s
+					time.Sleep(1 * time.Second)
+
 				}
-
-				// 休眠1s
-				time.Sleep(1 * time.Second)
-
 			}
-
+			defer dev.Close()
 		}()
 	}
 
@@ -197,7 +195,7 @@ func main() {
 				fmt.Scanln(&songListPath)
 				for {
 					if songListPath == "" {
-						songListPath = "自定义-许嵩.txt"
+						songListPath = "自定义-许嵩x.txt"
 					}
 					if !player.currentPlayList.SetList(songListPath) {
 						fmt.Printf("输入错误，请重新输入:")
