@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var isListening = false
+var isListening = true
 
 var genAllSongTxt = false
 
@@ -112,10 +112,14 @@ func main() {
 	// 起协程监听网址的变化
 	if isListening {
 		go func() {
+			// 打开NFC设备
 			dev, err := nfc.Open("")
 			if err != nil {
 				log.Fatal("打开NFC设备失败", err)
 			}
+			fmt.Print("请将NFC卡靠近NFC读卡器...")
+			defer dev.Close()
+
 			// 循环等待NFC消息
 			for {
 				// Poll for 300ms
@@ -216,13 +220,14 @@ func main() {
 	}()
 
 	Uid2SOngListMap := make(map[string]string)
+	Uid2SOngListMap["af70171c"] = "更换专辑:决斗巴哈 - 南拳妈妈.txt"
 
 	go func() {
 		for {
 			oprWeb := <-oprNFCChan
 			switch {
 			case strings.Contains(Uid2SOngListMap[oprWeb], "更换专辑"):
-				player.currentPlayList.SetList(strings.Split(oprWeb, ":")[2])
+				player.currentPlayList.SetList(strings.Split(Uid2SOngListMap[oprWeb], ":")[1])
 				if player.currentPlayList.SongNames != nil {
 					currentIndex = -1
 					player.changeSong(&currentIndex, 0)

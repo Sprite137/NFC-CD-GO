@@ -1,47 +1,83 @@
 package AllTest
 
 import (
+	myUtil "example.com/m/util"
+	"fmt"
+	"github.com/clausecker/nfc/v2"
+	"log"
 	"testing"
+	"time"
 )
 
+var modulations = []nfc.Modulation{
+	{Type: nfc.ISO14443a, BaudRate: nfc.Nbr106},
+	{Type: nfc.ISO14443b, BaudRate: nfc.Nbr106},
+	{Type: nfc.Felica, BaudRate: nfc.Nbr212},
+	{Type: nfc.Felica, BaudRate: nfc.Nbr424},
+	{Type: nfc.Jewel, BaudRate: nfc.Nbr106},
+	{Type: nfc.ISO14443biClass, BaudRate: nfc.Nbr106},
+}
+
 func TestNFC(t *testing.T) {
-	//fmt.Println(nfc.Version())
-	//devices, err := nfc.ListDevices()
+
+	//dev, err := nfc.Open("")
+	//defer dev.Close()
 	//if err != nil {
-	//	fmt.Print(err)
+	//	t.Skip("Cannot open device:", err)
+	//} else {
+	//	t.Log("打开设备成功")
+	//}
+	//// 初始化为读卡器
+	//err = dev.InitiatorInit()
+	//if err != nil {
 	//	return
 	//}
-	//for _, d := range devices {
-	//	fmt.Printf("found device %s", d)
-	//}
-	//// 检测 NFC 标签
-	//if nfcDev. {
-	//	// 读取 NFC 标签
-	//	tag, err := nfcDev.Read()
-	//	if err != nil {
-	//		fmt.Printf("读取 NFC 标签失败: %v\n", err)
-	//		return
-	//	}
+	//print("开始读取NFC卡")
 	//
-	//	// 显示标签信息
-	//	fmt.Printf("检测到 NFC 标签: %+v\n", tag)
-	//} else {
-	//	fmt.Println("未检测到 NFC 标签")
-	//}
-	// 打开 NFC 设备
-	//dev, err := nfc.Open("")
-	//if err != nil {
-	//	log.Fatalf("无法打开NFC设备: %v", err)
-	//}
-	//defer dev.Close()
+	////读取NFC卡uid
+	//buffer := make([]byte, 1024)
+	//time.Sleep(time.Second * 1)
 	//
-	//// 读取卡片数据，这里以读取第一个块为例
-	//data, err := dev.Information()
+	//// 读取Uid
+	//tx := []byte{0x02, 0x00, 0x02, 0x35, 0x31, 0x03}
 	//
-	//if err != nil {
-	//	log.Fatalf("读取卡片数据失败: %v", err)
+	//// 读取数据
+	////tx := []byte{0x02,0x00,0x04,0x35,0x33,0x00, 0x01,0x03}
+	//
+	//n, err := dev.InitiatorTransceiveBytes(tx, buffer, 10000)
+	//
+	//print(n)
+	//if n > 0 {
+	//	t.Log(buffer)
 	//}
-	//
-	//// 打印读取到的数据
-	//fmt.Printf("读取到的 NFC 卡数据: % X\n", data)
+
+}
+
+func TestGetNFCUid(t *testing.T) {
+	// 打开NFC设备
+	dev, err := nfc.Open("")
+	if err != nil {
+		log.Fatal("打开NFC设备失败", err)
+	}
+	defer dev.Close()
+
+	// 循环等待NFC消息
+	for {
+		// Poll for 300ms
+		tagCount, target, err := dev.InitiatorPollTarget(modulations, 1, 300*time.Millisecond)
+		if err != nil {
+			log.Println("Error polling the reader", err)
+			continue
+		}
+
+		// Check if a tag was detected
+		if tagCount > 0 {
+			Uid, err := myUtil.GetNfcUID(target)
+			if err != nil {
+				fmt.Printf("获取NFC卡Uid上失败%s \n", err)
+			}
+			fmt.Printf("获取NFC卡Uid上%s \n ", *Uid)
+		}
+
+	}
 }

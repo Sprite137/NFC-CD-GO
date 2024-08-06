@@ -4,6 +4,7 @@ go 1.22.5
 
 require (
 	github.com/clausecker/nfc/v2 v2.2.0
+	github.com/dpaks/goworkers v1.8.0
 	github.com/faiface/beep v1.1.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
