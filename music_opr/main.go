@@ -139,6 +139,9 @@ func main() {
 					fmt.Printf("获取NFC卡Uid上%s \n ", *Uid)
 				}
 
+				// 休眠1s
+				time.Sleep(1 * time.Second)
+
 			}
 
 		}()
@@ -219,9 +222,7 @@ func main() {
 
 	}()
 
-	Uid2SOngListMap := make(map[string]string)
-	Uid2SOngListMap["af70171c"] = "更换专辑:决斗巴哈 - 南拳妈妈.txt"
-
+	Uid2SOngListMap := myUtil.GetUid2SongListMap()
 	go func() {
 		for {
 			oprWeb := <-oprNFCChan
