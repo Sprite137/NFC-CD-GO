@@ -183,7 +183,6 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	length := targetFormat.SampleRate.D(p.currentStream.Len()) / time.Second
 	bar = myUtil.GetProgressBar(int(length), songName)
 	fmt.Printf("playing %v \n", songName)
-
 	speaker.Play(p.ctrl)
 }
 

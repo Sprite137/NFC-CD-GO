@@ -69,8 +69,7 @@ func main() {
 	go func() {
 		for {
 			if player.ctrl.Paused != true {
-				//fmt.Print(player.currentPosition(), "\n")
-				bar.Describe(fmt.Sprintf("playing    当前进度：%v", player.currentPosition()))
+				bar.Describe(fmt.Sprintf("playing    当前进度：%v ", player.currentPosition()))
 				bar.Add(1)
 				time.Sleep(1 * time.Second)
 			}
@@ -169,7 +168,7 @@ func main() {
 
 			// 切换歌单
 			case 3:
-				fmt.Print("请输入歌单txt:")
+				fmt.Print("请输入歌单txt: \n ")
 				songListPath := ""
 				fmt.Scanln(&songListPath)
 				for {
