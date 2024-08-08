@@ -4,6 +4,7 @@ import (
 	"example.com/m/entity"
 	"example.com/m/entity/const"
 	"example.com/m/entity/enum"
+	myUtil "example.com/m/util"
 	"fmt"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
@@ -180,7 +181,7 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	p.ctrl = &beep.Ctrl{Streamer: p.streamer}
 
 	length := targetFormat.SampleRate.D(p.currentStream.Len()) / time.Second
-	bar = getBar(int(length), songName)
+	bar = myUtil.GetProgressBar(int(length), songName)
 	fmt.Printf("playing %v \n", songName)
 
 	speaker.Play(p.ctrl)

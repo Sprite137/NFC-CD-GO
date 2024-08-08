@@ -5,7 +5,6 @@ import (
 	myUtil "example.com/m/util"
 	"fmt"
 	"github.com/clausecker/nfc/v2"
-	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"log"
 	"os"
@@ -28,26 +27,6 @@ var Modulations = []nfc.Modulation{
 	{Type: nfc.Felica, BaudRate: nfc.Nbr424},
 	{Type: nfc.Jewel, BaudRate: nfc.Nbr106},
 	{Type: nfc.ISO14443biClass, BaudRate: nfc.Nbr106},
-}
-
-func getBar(length int, songName string) *progressbar.ProgressBar {
-	bar = progressbar.NewOptions(length,
-		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionShowBytes(false),
-		progressbar.OptionFullWidth(),
-		progressbar.OptionShowDescriptionAtLineEnd(),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "[green]-[reset]",
-			SaucerHead:    "[green]>[reset]",
-			SaucerPadding: "[red]-[reset]",
-			BarStart:      "[",
-			BarEnd:        "]",
-		}),
-		progressbar.OptionSetPredictTime(false),
-		//progressbar.OptionClearOnFinish(),
-	)
-	return bar
 }
 
 func main() {
@@ -85,7 +64,7 @@ func main() {
 		}
 	}
 	length := targetFormat.SampleRate.D(player.currentStream.Len()) / time.Second
-	bar = getBar(int(length), strings.Split(file.Name(), "/")[1])
+	bar = myUtil.GetProgressBar(int(length), strings.Split(file.Name(), "/")[1])
 	// 打印歌曲进度，播放切换下一首
 	go func() {
 		for {

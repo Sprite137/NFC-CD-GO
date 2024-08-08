@@ -22,7 +22,7 @@ https://www.jianshu.com/p/c02b7f7a7cfa
 https://www.d-logic.com/zh/knowledge_base/libnfc-installation-on-windows-11/
 https://blog.csdn.net/fengshuiyue/article/details/37921717
 https://fanzheng.org/archives/29
- #### 2.1.2. linux安装libNFC的资料（推荐）
+ #### 2.1.2. linux安装libNFC（推荐）
 https://github.com/nfc-tools/libnfc
 #### 2.1.3. mac安装libNFC
 推荐直接用brew安装，具体安装自行搜索
@@ -43,3 +43,11 @@ go build -o player
 - resources存放了歌单(playList)和歌曲(music),如果要修改，可以放入其中
 - music暂时只支持mp3格式，应该会补充的
 - playList中请按已有的格式编辑或者新建自己的歌单
+
+## 4. REF
+1. https://github.com/nfc-tools/libnfc
+2. https://github.com/xBlaz3kx/nfc-reader-example
+3. https://github.com/0neSe7en/jikefm
+4. https://github.com/faiface/beep
+5. https://github.com/clausecker/nfc
+6. https://github.com/lyswhut/lx-music-desktop
