@@ -1,6 +1,8 @@
 package _const
 
-const (
-	SONGPATH     = "resources/music/"
-	PLAYLISTPATH = "resources/playlist/"
+import "path/filepath"
+
+var (
+	SONGPATH     = filepath.Join("resources", "music")
+	PLAYLISTPATH = filepath.Join("resources", "playList")
 )
