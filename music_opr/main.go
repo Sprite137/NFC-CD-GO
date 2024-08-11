@@ -14,7 +14,7 @@ import (
 
 var isListening = false
 
-var genAllSongTxt = false
+var genAllSongTxt = true
 
 var bar *progressbar.ProgressBar
 
