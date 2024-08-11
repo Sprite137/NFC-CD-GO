@@ -4,7 +4,6 @@ import (
 	"bufio"
 	_const "example.com/m/entity/const"
 	myutil "example.com/m/util"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -61,7 +60,7 @@ func (p *PlayList) SetList(filePath string) bool {
 			existAnySong = true
 		}
 		if string(line) != "" && string(line) != " " {
-			fmt.Print("歌单歌曲：", string(line), "\n")
+			//fmt.Print("歌单歌曲：", string(line), "\n")
 			results = append(results, string(line))
 		}
 
