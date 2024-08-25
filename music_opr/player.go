@@ -4,6 +4,7 @@ import (
 	"example.com/m/entity"
 	"example.com/m/entity/const"
 	"example.com/m/entity/enum"
+	myUtil "example.com/m/util"
 	"fmt"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/effects"
@@ -180,9 +181,8 @@ func (p *Player) changeSong(currentIndex *int, changeLogic int) {
 	p.ctrl = &beep.Ctrl{Streamer: p.streamer}
 
 	length := targetFormat.SampleRate.D(p.currentStream.Len()) / time.Second
-	bar = getBar(int(length), songName)
+	bar = myUtil.GetProgressBar(int(length), songName)
 	fmt.Printf("playing %v \n", songName)
-
 	speaker.Play(p.ctrl)
 }
 
@@ -254,4 +254,13 @@ func (p *Player) changePlayLogic() {
 		p.playLogic++
 	}
 	fmt.Printf("已切换当前播放逻辑为%s \n ", enum.LogicType(p.playLogic))
+}
+
+func (p *Player) playOrPause() {
+	p.togglePlay()
+	if p.ctrl.Paused {
+		fmt.Printf("paused...\n")
+	} else {
+		fmt.Printf("playing...\n")
+	}
 }

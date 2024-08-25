@@ -4,7 +4,7 @@ import (
 	_const "example.com/m/entity/const"
 	myUtil "example.com/m/util"
 	"fmt"
-	"github.com/k0kubun/go-ansi"
+	"github.com/clausecker/nfc/v2"
 	"github.com/schollz/progressbar/v3"
 	"log"
 	"os"
@@ -12,32 +12,21 @@ import (
 	"time"
 )
 
-var isListening = false
+var isListening = true
 
-var genAllSongTxt = false
+var genAllSongTxt = true
 
 var bar *progressbar.ProgressBar
 
 var originSong = "jazz-logo.mp3"
 
-func getBar(length int, songName string) *progressbar.ProgressBar {
-	bar = progressbar.NewOptions(length,
-		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionShowBytes(false),
-		progressbar.OptionFullWidth(),
-		progressbar.OptionShowDescriptionAtLineEnd(),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "[green]-[reset]",
-			SaucerHead:    "[green]>[reset]",
-			SaucerPadding: "[red]-[reset]",
-			BarStart:      "[",
-			BarEnd:        "]",
-		}),
-		progressbar.OptionSetPredictTime(false),
-		//progressbar.OptionClearOnFinish(),
-	)
-	return bar
+var Modulations = []nfc.Modulation{
+	{Type: nfc.ISO14443a, BaudRate: nfc.Nbr106},
+	{Type: nfc.ISO14443b, BaudRate: nfc.Nbr106},
+	{Type: nfc.Felica, BaudRate: nfc.Nbr212},
+	{Type: nfc.Felica, BaudRate: nfc.Nbr424},
+	{Type: nfc.Jewel, BaudRate: nfc.Nbr106},
+	{Type: nfc.ISO14443biClass, BaudRate: nfc.Nbr106},
 }
 
 func main() {
@@ -75,13 +64,12 @@ func main() {
 		}
 	}
 	length := targetFormat.SampleRate.D(player.currentStream.Len()) / time.Second
-	bar = getBar(int(length), strings.Split(file.Name(), "/")[1])
+	bar = myUtil.GetProgressBar(int(length), strings.Split(file.Name(), "/")[1])
 	// 打印歌曲进度，播放切换下一首
 	go func() {
 		for {
 			if player.ctrl.Paused != true {
-				//fmt.Print(player.currentPosition(), "\n")
-				bar.Describe(fmt.Sprintf("playing    当前进度：%v", player.currentPosition()))
+				bar.Describe(fmt.Sprintf("playing    当前进度：%v ", player.currentPosition()))
 				bar.Add(1)
 				time.Sleep(1 * time.Second)
 			}
@@ -97,18 +85,41 @@ func main() {
 	// 起协程获取opr
 	opr := make(chan interface{})
 
-	oprWebChan := make(chan string)
+	oprNFCChan := make(chan string)
 
 	// 起协程监听网址的变化
 	if isListening {
 		go func() {
-			time.Sleep(10 * time.Second)
-			for {
-				oprWebChan <- myUtil.GetReq()
-				print("getReq \n")
-				time.Sleep(500 * time.Second)
-			}
+			// 打开NFC设备
+			dev, err := nfc.Open("")
+			if err != nil {
+				log.Println("nfc设备打开失败")
+			} else {
+				fmt.Print("请将NFC卡靠近NFC读卡器...")
+				// 循环等待NFC消息
+				for {
+					// Poll for 300ms
+					tagCount, target, _ := dev.InitiatorPollTarget(Modulations, 1, 300*time.Millisecond)
+					if err != nil {
+						continue
+					}
 
+					// Check if a tag was detected
+					if tagCount > 0 {
+						Uid, err := myUtil.GetNfcUID(target)
+						if err != nil {
+							fmt.Printf("获取NFC卡Uid上失败%s \n", err)
+						}
+						oprNFCChan <- *Uid
+						fmt.Printf("获取NFC卡Uid上%s \n ", *Uid)
+					}
+
+					// 休眠1s
+					time.Sleep(1 * time.Second)
+
+				}
+			}
+			defer dev.Close()
 		}()
 	}
 
@@ -143,12 +154,7 @@ func main() {
 
 			// 暂停，恢复
 			case 0:
-				player.togglePlay()
-				if player.ctrl.Paused {
-					fmt.Printf("paused...\n")
-				} else {
-					fmt.Printf("playing...\n")
-				}
+				player.playOrPause()
 
 			// 切为下一首
 			case 1:
@@ -162,12 +168,12 @@ func main() {
 
 			// 切换歌单
 			case 3:
-				fmt.Print("请输入歌单txt:")
+				fmt.Print("请输入歌单txt: \n ")
 				songListPath := ""
 				fmt.Scanln(&songListPath)
 				for {
 					if songListPath == "" {
-						songListPath = "自定义-许嵩.txt"
+						songListPath = "自定义-许嵩x.txt"
 					}
 					if !player.currentPlayList.SetList(songListPath) {
 						fmt.Printf("输入错误，请重新输入:")
@@ -192,16 +198,24 @@ func main() {
 
 	}()
 
+	Uid2SOngListMap := myUtil.GetUid2SongListMap()
 	go func() {
 		for {
-			oprWeb := <-oprWebChan
+			oprWeb := <-oprNFCChan
 			switch {
-			case strings.Contains(oprWeb, "更换专辑"):
-				player.currentPlayList.SetList(strings.Split(oprWeb, ":")[1])
+			case strings.Contains(Uid2SOngListMap[oprWeb], "更换专辑"):
+				fmt.Printf("准备切换歌单为%v\n", strings.Split(Uid2SOngListMap[oprWeb], ":")[1])
+				if !player.currentPlayList.SetList(strings.Split(Uid2SOngListMap[oprWeb], ":")[1]) {
+					fmt.Printf("切换歌单失败 \n")
+				} else {
+					fmt.Printf("成功切换歌单为%v \n", strings.Split(Uid2SOngListMap[oprWeb], ":")[1])
+				}
 				if player.currentPlayList.SongNames != nil {
 					currentIndex = -1
 					player.changeSong(&currentIndex, 0)
 				}
+			case strings.Contains(Uid2SOngListMap[oprWeb], "暂停/播放"):
+				player.playOrPause()
 			}
 		}
 	}()
