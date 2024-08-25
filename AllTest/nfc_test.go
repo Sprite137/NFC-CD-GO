@@ -22,6 +22,8 @@ func TestNFC(t *testing.T) {
 
 	//dev, err := nfc.Open("")
 	//defer dev.Close()
+	//fmt.Println(nfc.Version())
+	//devices, err := nfc.ListDevices()
 	//if err != nil {
 	//	t.Skip("Cannot open device:", err)
 	//} else {
@@ -80,4 +82,20 @@ func TestGetNFCUid(t *testing.T) {
 		}
 
 	}
+	// 打开 NFC 设备
+	//dev, err := nfc.Open("")
+	//if err != nil {
+	//	log.Fatalf("无法打开NFC设备: %v", err)
+	//}
+	//defer dev.Close()
+	//
+	//// 读取卡片数据，这里以读取第一个块为例
+	//data, err := dev.Information()
+	//
+	//if err != nil {
+	//	log.Fatalf("读取卡片数据失败: %v", err)
+	//}
+	//
+	//// 打印读取到的数据
+	//fmt.Printf("读取到的 NFC 卡数据: % X\n", data)
 }
