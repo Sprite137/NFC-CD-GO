@@ -17,7 +17,7 @@
 
 ## 2. 使用说明
 ### 2.1. 安装libNFC
- #### 2.1.1. windows安装libNFC的资料（不推荐，巨他妈难装，而且安装了libNFC也还有问题）
+ #### 2.1.1. windows安装libNFC的资料（不推荐，巨难装，而且安装了libNFC也还有问题）
 https://www.jianshu.com/p/c02b7f7a7cfa
 https://www.d-logic.com/zh/knowledge_base/libnfc-installation-on-windows-11/
 https://blog.csdn.net/fengshuiyue/article/details/37921717
