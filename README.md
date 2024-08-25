@@ -51,3 +51,4 @@ go build -o player
 4. https://github.com/faiface/beep
 5. https://github.com/clausecker/nfc
 6. https://github.com/lyswhut/lx-music-desktop
+7. https://blog.csdn.net/u012915636/article/details/115414911

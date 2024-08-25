@@ -204,7 +204,12 @@ func main() {
 			oprWeb := <-oprNFCChan
 			switch {
 			case strings.Contains(Uid2SOngListMap[oprWeb], "更换专辑"):
-				player.currentPlayList.SetList(strings.Split(Uid2SOngListMap[oprWeb], ":")[1])
+				fmt.Printf("准备切换歌单为%v\n", strings.Split(Uid2SOngListMap[oprWeb], ":")[1])
+				if !player.currentPlayList.SetList(strings.Split(Uid2SOngListMap[oprWeb], ":")[1]) {
+					fmt.Printf("切换歌单失败 \n")
+				} else {
+					fmt.Printf("成功切换歌单为%v \n", strings.Split(Uid2SOngListMap[oprWeb], ":")[1])
+				}
 				if player.currentPlayList.SongNames != nil {
 					currentIndex = -1
 					player.changeSong(&currentIndex, 0)
